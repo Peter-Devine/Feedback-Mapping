@@ -1,5 +1,5 @@
 import pandas as pd
-from download_util_base import DownloadUtilBase
+from data.download_util_base import DownloadUtilBase
 
 class Guzman2015(DownloadUtilBase):
     def download(self):

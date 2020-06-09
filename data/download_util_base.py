@@ -5,6 +5,9 @@ class DownloadUtilBase:
         self.random_state = random_state
         self.download_dir = download_dir
 
+        if not os.path.exists(self.download_dir):
+            os.makedirs(self.download_dir)
+
     def download(self, train, val, test):
         train.to_csv(os.path.join(self.download_dir, "train.csv"))
         val.to_csv(os.path.join(self.download_dir, "val.csv"))
