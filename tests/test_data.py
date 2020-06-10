@@ -5,6 +5,7 @@ import shutil
 import pandas as pd
 
 from data.guzman_2015 import Guzman2015
+from tests.utils import delete_tree
 
 class TestDataDownloaders(unittest.TestCase):
 
@@ -13,12 +14,9 @@ class TestDataDownloaders(unittest.TestCase):
 
         guzman_dir = os.path.join(data_dir, "guzman_2015")
 
-        if os.path.exists(guzman_dir):
-            shutil.rmtree(guzman_dir, ignore_errors=True)
-        if os.path.exists(data_dir):
-            shutil.rmtree(data_dir, ignore_errors=True)
+        delete_tree(guzman_dir)
 
-        self.assertFalse(os.path.exists(data_dir), msg=f"Failed in deleting all files from {data_dir}")
+        self.assertFalse(os.path.exists(guzman_dir), msg=f"Failed in deleting all files from {guzman_dir}")
 
         Guzman2015(random_state=1, download_dir=guzman_dir).download()
 

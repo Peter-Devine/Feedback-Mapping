@@ -6,6 +6,7 @@ import pandas as pd
 
 from tests.test_data import TestDataDownloaders
 from mapping.mapping_models.use import UseMapper
+from tests.utils import delete_tree
 
 class TestMappings(unittest.TestCase):
 
@@ -19,8 +20,7 @@ class TestMappings(unittest.TestCase):
         embed_folder = os.path.join(".", "data", "embeddings", dataset_name)
         embed_path = os.path.join(embed_folder, f"{mapping_name}.csv")
 
-        if os.path.exists(embed_folder):
-            shutil.rmtree(embed_folder, ignore_errors=True)
+        delete_tree(embed_folder)
 
         use_mapper = UseMapper(dataset_name)
 
@@ -41,7 +41,10 @@ class TestMappings(unittest.TestCase):
         self.assertTrue(df.shape[1] > 0, msg=f"DataFrame extracted from {df_dir} has less than 0 columns (columns number {df.shape[0]})")
 
         for column in df.columns:
-            self.assertEqual(df[column].dtype, "float64", msg=f"Dataframe {df_dir}\n Column {column}\n is not of datatype float32 (actual dtype {df[column].dtype})")
+            if column == "label":
+                self.assertEqual(df[column].dtype, "O", msg=f"Dataframe {df_dir}\n Column {column}\n is not of datatype object (actual dtype {df[column].dtype})")
+            else:
+                self.assertEqual(df[column].dtype, "float64", msg=f"Dataframe {df_dir}\n Column {column}\n is not of datatype float32 (actual dtype {df[column].dtype})")
 
 if __name__ == '__main__':
     unittest.main()
