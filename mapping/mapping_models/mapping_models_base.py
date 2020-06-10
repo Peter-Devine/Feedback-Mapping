@@ -37,7 +37,7 @@ class BaseMapper:
         # Return the df of this csv dataset
         return pd.read_csv(dataset_path)
 
-    def output_embeddings(self, embedding):
+    def output_embeddings(self, embedding, labels):
         # Make sure the embedding folder exists
         dataset_embedding_folder = os.path.join(self.output_dataset_dir, self.test_task)
         self.check_dir(dataset_embedding_folder)
@@ -45,9 +45,14 @@ class BaseMapper:
         # Output the embeddings to a csv file in the embeddings folder
         dataset_embedding_file = os.path.join(dataset_embedding_folder, f"{self.mapping_name}.csv")
 
-        pd.DataFrame(embedding).to_csv(dataset_embedding_file, index=False)
+        # Get Dataframe from embeddings array
+        embedding_df = pd.DataFrame(embedding)
+
+        embedding_df["label"] = labels
+
+        embedding_df.to_csv(dataset_embedding_file, index=False)
 
     def embed(self):
-        embeddings = self.get_embeds()
+        embeddings, labels = self.get_embeds()
 
-        self.output_embeddings(embeddings)
+        self.output_embeddings(embeddings, labels)
