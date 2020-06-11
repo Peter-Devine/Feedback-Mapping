@@ -14,5 +14,5 @@ def get_mapper(mapping_type, dataset):
     mapping_type = mapping_type.upper()
     assert mapping_type in MAPPER_DICT.keys(), f"{mapping_type} mapping type unsupported.\nSupported mappings are {MAPPER_DICT.keys()}."
     mapper_class = MAPPER_DICT[mapping_type]
-    mapper = mapper_class(test_task=dataset)
+    mapper = mapper_class(test_dataset=dataset)
     return mapper
