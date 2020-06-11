@@ -2,4 +2,4 @@ __pycache__/
 data/embeddings/
 data/raw/
 results/
-mapping/saved_models/
+mapping/mapping_models/saved_models/
