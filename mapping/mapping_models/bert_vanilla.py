@@ -14,7 +14,7 @@ class BertVanillaMapper(BaseMapper):
     def get_embeds(self):
         df = self.get_dataset(self.test_dataset, split="test")
 
-        MODEL_NAME = 'roberta-large'
+        MODEL_NAME = 'bert-base-uncased'
 
         # Load pre-trained model tokenizer (vocabulary)
         tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=True)
