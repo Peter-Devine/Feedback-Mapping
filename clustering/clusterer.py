@@ -7,29 +7,34 @@ from sklearn.metrics import pairwise_distances_argmin_min
 
 from utils.utils import create_dir
 
-def cluster_data(list_of_datasets):
+def cluster_data(list_of_datasets, list_of_embeddings):
     # Cycle through all the datasets provided
-    for dataset in list_of_datasets:
+    for dataset_name in list_of_datasets:
         # Get all the embedding files available for this dataset
-        embedding_files_data = get_embeddings_paths(dataset)
+        embedding_files_data = get_embeddings_paths(dataset_name)
 
         for embedding_file, embedding_name in embedding_files_data:
-            # Get embedding data
-            embeddings, labels = get_embedding_data(embedding_file)
+            if embedding_name in list_of_embeddings:
+                # Cluster single embedding from single dataset
+                cluster_single_dataset(dataset_name, embedding_file, embedding_name)
 
-            # Cluster on embeddings and get predicted cluster membership
-            preds, kmeans = cluster_kmeans(embeddings, labels)
+def cluster_single_dataset(dataset_name, embedding_file, embedding_name):
+    # Get embedding data
+    embeddings, labels = get_embedding_data(embedding_file)
 
-            # Score predictions compared to golds
-            scores = score_clustering(labels, preds)
+    # Cluster on embeddings and get predicted cluster membership
+    preds, kmeans = cluster_kmeans(embeddings, labels)
 
-            # Get the indices of the observations closest to the centroid for each cluster
-            closest_idx = get_examples_idx(kmeans, embeddings)
+    # Score predictions compared to golds
+    scores = score_clustering(labels, preds)
 
-            # Get the text of the observations closest to the centroid for each cluster
-            example_obs = get_examples_text(closest_idx, dataset)
+    # Get the indices of the observations closest to the centroid for each cluster
+    closest_idx = get_examples_idx(kmeans, embeddings)
 
-            output_results(scores, example_obs, dataset, embedding_name)
+    # Get the text of the observations closest to the centroid for each cluster
+    example_obs = get_examples_text(closest_idx, dataset_name)
+
+    output_results(scores, example_obs, dataset_name, embedding_name)
 
 def output_results(scores_df, example_obs_df, dataset_name, embedding_name):
 
