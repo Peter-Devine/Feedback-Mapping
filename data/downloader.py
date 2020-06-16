@@ -4,6 +4,10 @@ from data.maalej_2016 import Maalej2016
 from data.williams_2017 import Williams2017
 
 def get_data(list_of_data, random_state):
+    for dataset in list_of_data:
+        get_single_dataset(dataset, random_state)
+
+def get_single_dataset(dataset, random_state):
 
     DOWNLOADER_DICT = {
         "guzman_2015": Guzman2015,
@@ -12,9 +16,10 @@ def get_data(list_of_data, random_state):
     }
 
     DOWNLOAD_DIR = os.path.join(".", "data", "raw")
+    if not os.path.exists(DOWNLOAD_DIR):
+        os.mkdir(DOWNLOAD_DIR)
 
-    for dataset in list_of_data:
-        dataset_download_dir = os.path.join(DOWNLOAD_DIR, dataset)
-        if not os.path.exists(dataset_download_dir):
-            downloader = DOWNLOADER_DICT[dataset](random_state = random_state, download_dir = dataset_download_dir)
-            downloader.download()
+    dataset_download_dir = os.path.join(DOWNLOAD_DIR, dataset)
+    if not os.path.exists(dataset_download_dir):
+        downloader = DOWNLOADER_DICT[dataset](random_state = random_state, download_dir = dataset_download_dir)
+        downloader.download()
