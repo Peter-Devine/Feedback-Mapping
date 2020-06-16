@@ -6,10 +6,13 @@ from visualisation.visualise import visualise_data
 
 from clustering.clusterer import cluster_data
 
-get_data(["guzman_2015"], random_state=111)
+datasets = ["williams_2017"]
+embeddings = ["glove"]
 
-map_data(["guzman_2015"], ["tfidf_pca"])
+get_data(datasets, random_state=111)
 
-visualise_data(["guzman_2015"])
+map_data(datasets, embeddings)
 
-cluster_data(["guzman_2015"])
+visualise_data(datasets, embeddings)
+
+cluster_data(datasets, embeddings)
