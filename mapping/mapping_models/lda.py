@@ -11,7 +11,8 @@ class LdaMapper(BaseMapper):
         vectorizer = CountVectorizer()
         bow_embed = vectorizer.fit_transform(df.text)
 
-        lda = LatentDirichletAllocation(n_components=100, max_iter=5, learning_method='online', learning_offset=50., random_state=self.random_state)
+        print("TODO - program in proper random state for whole project")
+        lda = LatentDirichletAllocation(n_components=100, max_iter=5, learning_method='online', learning_offset=50., random_state=111)
         embeddings = lda.fit_transform(bow_embed)
 
         return embeddings, df.label

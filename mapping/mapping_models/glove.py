@@ -37,7 +37,7 @@ class GloveMapper(BaseMapper):
                     embedding.append(embeddings_dict[word_lower])
 
             if len(embedding) < 1:
-                embedding = np.asarray([0]*embedding_size)
+                embedding = [np.asarray([0]*embedding_size)]
 
             return np.stack(embedding).mean(axis=0)
 
