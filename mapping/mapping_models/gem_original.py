@@ -5,6 +5,8 @@ import nltk
 import io
 import random
 from tqdm import tqdm
+import os
+import requests
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
 
@@ -50,13 +52,13 @@ class GemMapper(BaseMapper):
             session = requests.Session()
 
             response = session.get(URL, params = { 'id' : id }, stream = True)
-            token = get_confirm_token(response)
+            token = self.get_confirm_token(response)
 
             if token:
                 params = { 'id' : id, 'confirm' : token }
                 response = session.get(URL, params = params, stream = True)
 
-            save_response_content(response, destination)
+            self.save_response_content(response, destination)
 
         np_file = np.load(destination, allow_pickle=True, encoding = 'latin1')
 
