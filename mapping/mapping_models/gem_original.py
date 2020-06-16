@@ -22,7 +22,7 @@ class GemMapper(BaseMapper):
         return embeddings, df.label
 
     def get_mapping_name(self, test_dataset):
-        return "gem"
+        return "gem-original"
 
     def prepare_data(self):
         self.EPS = 5e-7
