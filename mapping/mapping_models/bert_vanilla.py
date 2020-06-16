@@ -21,6 +21,7 @@ class BertVanillaMapper(BaseMapper):
 
         # Load the BERT model
         model = AutoModel.from_pretrained(MODEL_NAME)
+        model = model.to(self.device)
 
         MAX_LENGTH = 128
         BATCH_SIZE = 64
@@ -44,7 +45,7 @@ class BertVanillaMapper(BaseMapper):
             # Iterate over all batches, passing the batches through the
             for test_batch in tqdm(test_loader):
                 # See the models docstrings for the detail of the inputs
-                outputs = model(test_batch)
+                outputs = model(test_batch.to(self.device))
                 # Output the final average encoding across all characters as a numpy array
                 np_array = outputs[0].mean(dim=1).numpy()
                 # Append this encoding to a list
