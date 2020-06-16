@@ -1,5 +1,8 @@
 import os
 import pandas as pd
+
+import torch
+
 from utils.utils import create_dir
 
 
@@ -18,6 +21,9 @@ class BaseMapper:
 
         # Get mapping name
         self.mapping_name = self.get_mapping_name(test_dataset)
+
+        # Get the device that is available currently for torch training/inference
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         # Model directory
         self.model_repo_dir = os.path.join(".", "mapping", "mapping_models", "saved_models")
