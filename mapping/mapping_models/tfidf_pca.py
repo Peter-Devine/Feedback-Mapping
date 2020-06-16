@@ -1,5 +1,3 @@
-import pandas as pd
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 
@@ -12,7 +10,7 @@ class TfidfPcaMapper(BaseMapper):
 
         vectorizer = TfidfVectorizer()
         tf_idf_embed = vectorizer.fit_transform(df.text)
-        pca = TruncatedSVD(n_components=500)
+        pca = TruncatedSVD(n_components=100)
         low_dim_embed = pca.fit_transform(tf_idf_embed)
 
         return low_dim_embed, df.label
