@@ -8,6 +8,8 @@ from transformers import AutoConfig, AutoTokenizer, AutoModelWithLMHead
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
 
+# Credit https://github.com/BinWang28/SBERT-WK-Sentence-Embedding
+
 class SBertWKMapper(BaseMapper):
 
     def get_embeds(self):

@@ -10,6 +10,8 @@ import requests
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
 
+# Credit https://github.com/ziyi-yang/GEM
+
 class GemMapper(BaseMapper):
 
     def get_embeds(self):

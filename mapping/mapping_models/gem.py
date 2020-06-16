@@ -17,7 +17,7 @@ class GemMapper(BaseMapper):
         embedding_matrix, vocab = self.download_and_get_matrix(embedding_size = 300)
 
         embedder = SentenceEmbedder(df.text, embedding_matrix, vocab)
-        embeddings = embedder.gem(window_size=3, sigma_power=3)
+        embeddings = embedder.gem()
         return embeddings, df.label
 
     def download_and_get_matrix(self, embedding_size):
