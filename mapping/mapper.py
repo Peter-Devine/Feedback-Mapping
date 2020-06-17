@@ -19,6 +19,10 @@ MAPPER_DICT = {
 }
 
 def map_data(list_of_datasets, list_of_mappings):
+    # If no mapping specified, run all
+    if len(list_of_mappings) < 1:
+        list_of_mappings = MAPPER_DICT.keys()
+
     for dataset in list_of_datasets:
         for mapping in list_of_mappings:
             embed_single_dataset(mapping, dataset)
