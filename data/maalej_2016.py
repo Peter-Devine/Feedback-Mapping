@@ -36,8 +36,7 @@ class Maalej2016(DownloadUtilBase):
         shutil.rmtree(task_data_path)
 
         df = pd.DataFrame({"text": [
-            "Title: " + x["title"] + " Comment: " + x["comment"] if x["title"] is not None else "Comment: " + x[
-                "comment"] for x in data], "label": [x["label"] for x in data]})
+             x["title"] + " " + x["comment"] if x["title"] is not None else x["comment"] for x in data], "label": [x["label"] for x in data]})
 
         train_and_val = df.sample(frac=0.8, random_state=self.random_state)
         train = train_and_val.sample(frac=0.7, random_state=self.random_state)
