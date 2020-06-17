@@ -6,6 +6,7 @@ from mapping.mapping_models.glove import GloveMapper
 from mapping.mapping_models.sbert import SBertMapper
 from mapping.mapping_models.sbert_wk import SBertWKMapper
 from mapping.mapping_models.gem import GemMapper
+from mapping.mapping_models.t5_vanilla import T5VanillaMapper
 
 MAPPER_DICT = {
     "use": UseMapper,
@@ -16,6 +17,7 @@ MAPPER_DICT = {
     "sbert": SBertMapper,
     "sbert_wk": SBertWKMapper,
     "gem": GemMapper,
+    "t5_vanilla": T5VanillaMapper,
 }
 
 def map_data(list_of_datasets, list_of_mappings):
