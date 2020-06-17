@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.preprocessing import normalize
+from tqdm import tqdm
 
 import torch
 
@@ -16,19 +17,22 @@ class SBertWKMapper(BaseMapper):
         df = self.get_dataset(self.test_dataset, split="test")
 
         # Get embeddings from text series
-        embeddings = self.get_sentence_embeds(df.text)
+        embeddings = self.get_sentence_embeds(df.text.values)
 
         return embeddings, df.label
 
     def get_sentence_embeds(self, sentences):
-        MODEL_NAME = "binwang/bert-base-nli"
+        self.model_name = "binwang/bert-base-nli"
+        BATCH_SIZE = 64
 
         #Get SBERT-WK model and tokenizer
-        config = AutoConfig.from_pretrained(MODEL_NAME, cache_dir=self.model_dir)
+        config = AutoConfig.from_pretrained(self.model_name, cache_dir=self.model_dir)
         config.output_hidden_states = True
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, cache_dir=self.model_dir)
-        model = AutoModelWithLMHead.from_pretrained(MODEL_NAME, config=config, cache_dir=self.model_dir)
+        tokenizer = AutoTokenizer.from_pretrained(self.model_name, cache_dir=self.model_dir)
+        model = AutoModelWithLMHead.from_pretrained(self.model_name, config=config, cache_dir=self.model_dir)
         model = model.to(self.device)
+        model.eval()
+        model.zero_grad()
 
         params = {
             "max_seq_length": 128,
@@ -36,20 +40,26 @@ class SBertWKMapper(BaseMapper):
             "layer_start": 4
         }
 
-        inputs, features_mask = self.get_model_inputs(sentences, tokenizer, params)
+        test_loader = torch.utils.data.DataLoader(sentences, batch_size=BATCH_SIZE, shuffle=False)
 
-        model.zero_grad()
+        embeddings = []
+        print("Instantiating on SBERT-WK")
+        for sentence_batch in tqdm(test_loader):
+            inputs, features_mask = self.get_model_inputs(sentence_batch, tokenizer, params)
 
-        with torch.no_grad():
-            features = model(**inputs)[1]
+            with torch.no_grad():
+                features = model(**inputs)[1]
 
-        # Reshape features from list of (batch_size, seq_len, hidden_dim) for each hidden state to list
-        # of (num_hidden_states, seq_len, hidden_dim) for each element in the batch.
-        all_layer_embedding = torch.stack(features).permute(1, 0, 2, 3).cpu().numpy()
+            # Reshape features from list of (batch_size, seq_len, hidden_dim) for each hidden state to list
+            # of (num_hidden_states, seq_len, hidden_dim) for each element in the batch.
+            all_layer_embedding = torch.stack(features).permute(1, 0, 2, 3).cpu().numpy()
 
-        embedding = self.dissecting(params, all_layer_embedding, features_mask)
+            embedding = self.dissecting(params, all_layer_embedding, features_mask)
+            embeddings.append(embedding)
 
-        return embedding
+        embeddings = np.concatenate(embeddings, axis=0)
+
+        return embeddings
 
     def get_model_inputs(self, sentences, tokenizer, params):
         sentences_index = [tokenizer.encode(s, add_special_tokens=True) for s in sentences]
@@ -75,7 +85,7 @@ class SBertWKMapper(BaseMapper):
 
         batch_input_ids = torch.tensor(features_input_ids, dtype=torch.long)
         batch_input_mask = torch.tensor(features_mask, dtype=torch.long)
-        batch = [batch_input_ids.to(device), batch_input_mask.to(device)]
+        batch = [batch_input_ids.to(self.device), batch_input_mask.to(self.device)]
 
         inputs = {"input_ids": batch[0], "attention_mask": batch[1]}
 

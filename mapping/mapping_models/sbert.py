@@ -7,13 +7,13 @@ class SBertMapper(BaseMapper):
         df = self.get_dataset(self.test_dataset, split="test")
 
         # Get SBERT model
-        MODEL_NAME = 'bert-base-nli-mean-tokens'
-        model = SentenceTransformer(MODEL_NAME)
+        self.model_name = 'bert-base-nli-mean-tokens'
+        model = SentenceTransformer(self.model_name)
         model = model.to(self.device)
 
         # Get embeddings for sentences
         BATCH_SIZE = 64
-        sentence_embeddings = model.encode(df.text, batch_size = BATCH_SIZE, show_progress_bar = True)
+        sentence_embeddings = model.encode(df.text.values, batch_size = BATCH_SIZE, show_progress_bar = True)
 
         return sentence_embeddings, df.label
 
