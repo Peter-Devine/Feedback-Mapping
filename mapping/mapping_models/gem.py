@@ -10,6 +10,8 @@ from mapping.mapping_models.mapping_models_base import BaseMapper
 
 from tqdm import tqdm
 
+# Credit https://github.com/fursovia/geometric_embedding
+
 class GemMapper(BaseMapper):
     def get_embeds(self):
         df = self.get_dataset(self.test_dataset, split="test")
