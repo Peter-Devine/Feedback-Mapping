@@ -8,13 +8,15 @@ from sklearn.metrics import pairwise_distances_argmin_min
 from utils.utils import create_dir
 
 def cluster_data(list_of_datasets, list_of_embeddings):
+    run_all = bool(len(list_of_embeddings) < 1)
+
     # Cycle through all the datasets provided
     for dataset_name in list_of_datasets:
         # Get all the embedding files available for this dataset
         embedding_files_data = get_embeddings_paths(dataset_name)
 
         for embedding_file, embedding_name in embedding_files_data:
-            if embedding_name in list_of_embeddings:
+            if run_all or embedding_name in list_of_embeddings:
                 # Cluster single embedding from single dataset
                 cluster_single_dataset(dataset_name, embedding_file, embedding_name)
 
