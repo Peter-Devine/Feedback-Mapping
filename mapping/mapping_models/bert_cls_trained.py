@@ -37,9 +37,6 @@ class BertClsTrainedMapper(BaseMapper):
         # Create list for all embeddings to be saved to
         embeddings = []
 
-        # Get the number of observations to embed
-        num_obs = tokens_tensor.shape[0]
-
         # Batch tensor so we can iterate over inputs
         test_loader = torch.utils.data.DataLoader(tokens_tensor, batch_size=BATCH_SIZE, shuffle=False)
 
@@ -70,6 +67,11 @@ class BertClsTrainedMapper(BaseMapper):
         model.load_state_dict(torch.load(model_path))
 
         return model
+
+    def train_model(self, model_path):
+        df = self.get_dataset(self.test_dataset, split="test")
+
+        
 
     def get_mapping_name(self, test_dataset):
         return f"bert_{test_dataset}cls_trained"
