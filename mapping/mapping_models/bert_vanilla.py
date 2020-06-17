@@ -14,14 +14,16 @@ class BertVanillaMapper(BaseMapper):
     def get_embeds(self):
         df = self.get_dataset(self.test_dataset, split="test")
 
-        MODEL_NAME = 'bert-base-uncased'
+        self.model_name = 'bert-base-uncased'
 
         # Load pre-trained model tokenizer (vocabulary)
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=True)
+        tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
 
         # Load the BERT model
-        model = AutoModel.from_pretrained(MODEL_NAME)
+        model = AutoModel.from_pretrained(self.model_name)
         model = model.to(self.device)
+        model.eval()
+        model.zero_grad()
 
         MAX_LENGTH = 128
         BATCH_SIZE = 64
@@ -41,7 +43,7 @@ class BertVanillaMapper(BaseMapper):
 
         # Make sure the torch algorithm runs without gradients (as we aren't training)
         with torch.no_grad():
-            print(f"Iterating over inputs {MODEL_NAME} vanilla")
+            print(f"Iterating over inputs {self.model_name} vanilla")
             # Iterate over all batches, passing the batches through the
             for test_batch in tqdm(test_loader):
                 # See the models docstrings for the detail of the inputs
