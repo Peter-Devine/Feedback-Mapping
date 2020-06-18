@@ -21,6 +21,7 @@ def visualise_data(dataset_names, list_of_embeddings):
 
         for embedding_file, embedding_name in embedding_files_data:
             if run_all or embedding_name in list_of_embeddings:
+                print(f"Visualising {dataset_name} in {embedding_name}")
                 # Create the visulisation for each embedding and dataset
                 visualise_single_dataset(dataset_name, embedding_file, embedding_name)
 
@@ -91,3 +92,5 @@ def graph_PCA_data(twoD_mapping_df, dataset_name, mapping_name):
     file_name = get_graph_name(dataset_name, mapping_name)
 
     plt.savefig(file_name)
+
+    plt.close()

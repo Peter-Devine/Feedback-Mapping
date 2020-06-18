@@ -17,6 +17,7 @@ def cluster_data(list_of_datasets, list_of_embeddings):
 
         for embedding_file, embedding_name in embedding_files_data:
             if run_all or embedding_name in list_of_embeddings:
+                print(f"Clustering {dataset_name} in {embedding_name}")
                 # Cluster single embedding from single dataset
                 cluster_single_dataset(dataset_name, embedding_file, embedding_name)
 
