@@ -78,7 +78,7 @@ def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patie
         target_score = results[TARGET_METRIC]
         print(f"{TARGET_METRIC} is {target_score} at epoch {epoch}")
 
-        is_patience_up, epochs_since_last_best, best_score = check_best(model, epochs_since_last_best, target_score, best_score)
+        is_patience_up, epochs_since_last_best, best_score = check_best(model, epochs_since_last_best, target_score, best_score, patience)
 
         # Calculate whether patience has been exceeded or not
         if is_patience_up:
@@ -90,7 +90,7 @@ def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patie
 
     return model.lang_model
 
-def check_best(model, epochs_since_last_best, target_score, best_score):
+def check_best(model, epochs_since_last_best, target_score, best_score, patience):
 
     if target_score > best_score:
         best_score = target_score
