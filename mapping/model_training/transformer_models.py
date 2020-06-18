@@ -12,7 +12,7 @@ def get_cls_model_and_optimizer(language_model, n_classes, lr, eps, wd, device):
           self.linear = nn.Linear(hidden_size, n_classes)
 
       def forward(self, x):
-          x = self.lang_model(input_ids=x.to(device))
+          x = self.lang_model(input_ids=x[0].to(device))
           x = self.linear(x[0].mean(dim=1))
           return x
 

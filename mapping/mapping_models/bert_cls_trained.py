@@ -10,13 +10,14 @@ from tqdm import tqdm
 import torch
 from transformers import AutoTokenizer, AutoModel
 from mapping.mapping_models.mapping_models_base import BaseMapper
+from mapping.model_training.transformer_training import train_cls
 
 class BertClsTrainedMapper(BaseMapper):
 
     def get_embeds(self):
         df = self.get_dataset(self.test_dataset, split="test")
 
-        self.model_name = 'binwang/bert-base-nli'
+        self.set_parameters()
 
         # Load pre-trained model tokenizer (vocabulary)
         tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
@@ -27,22 +28,19 @@ class BertClsTrainedMapper(BaseMapper):
         model.eval()
         model.zero_grad()
 
-        MAX_LENGTH = 128
-        BATCH_SIZE = 64
-
         # Tokenize and convert to input IDs
-        tokens_tensor = tokenizer.batch_encode_plus(list(df.text.values), max_length = MAX_LENGTH, pad_to_max_length=True, return_tensors="pt")
+        tokens_tensor = tokenizer.batch_encode_plus(list(df.text.values), max_length = self.max_length, pad_to_max_length=True, return_tensors="pt")
         tokens_tensor = tokens_tensor["input_ids"]
 
         # Create list for all embeddings to be saved to
         embeddings = []
 
         # Batch tensor so we can iterate over inputs
-        test_loader = torch.utils.data.DataLoader(tokens_tensor, batch_size=BATCH_SIZE, shuffle=False)
+        test_loader = torch.utils.data.DataLoader(tokens_tensor, batch_size=self.batch_size, shuffle=False)
 
         # Make sure the torch algorithm runs without gradients (as we aren't training)
         with torch.no_grad():
-            print(f"Iterating over inputs {self.model_name} vanilla")
+            print(f"Iterating over inputs {self.model_name} cls trained")
             # Iterate over all batches, passing the batches through the
             for test_batch in tqdm(test_loader):
                 # See the models docstrings for the detail of the inputs
@@ -56,22 +54,35 @@ class BertClsTrainedMapper(BaseMapper):
 
         return all_embeddings, df.label
 
+    def set_parameters(self):
+        self.model_name = 'binwang/bert-base-nli'
+        self.max_length = 128
+        self.batch_size = 64
+
     def get_model(self):
         model_path = os.path.join(self.model_dir, f"{self.test_dataset}.pt")
+
+        self.set_parameters()
 
         model = AutoModel.from_pretrained(self.model_name)
 
         if not os.path.exists(model_path):
+            print(f"Running BERT classification training on {self.test_dataset}")
             self.train_model(model_path)
 
-        model.load_state_dict(torch.load(model_path))
+
+        print(f"Loading BERT classification model trained on {self.test_dataset}")
+        model.load_state_dict(torch.load(model_path, map_location=self.device))
 
         return model
 
     def train_model(self, model_path):
-        df = self.get_dataset(self.test_dataset, split="test")
+        train_df = self.get_dataset(self.test_dataset, split="train")
+        valid_df = self.get_dataset(self.test_dataset, split="val")
 
-        
+        model = train_cls(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device)
+
+        torch.save(model.state_dict(), model_path)
 
     def get_mapping_name(self, test_dataset):
-        return f"bert_{test_dataset}cls_trained"
+        return f"bert_cls_trained"
