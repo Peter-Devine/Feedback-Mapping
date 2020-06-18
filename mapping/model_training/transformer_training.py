@@ -114,27 +114,27 @@ def setup_temp_model_repo():
         os.mkdir(temp_model_repo_path)
     return temp_model_repo_path
 
-def delete_temp_models():
+def delete_temp_model(model_name = "temp"):
     temp_model_repo_path = setup_temp_model_repo()
-    temp_model_path = os.path.join(temp_model_repo, "temp.pt")
+    temp_model_path = os.path.join(temp_model_repo_path, f"{model_name}.pt")
     print(f"Deleting {temp_model_path}...")
     os.remove(temp_model_path)
 
-def save_model(model):
+def save_model(model, model_name = "temp"):
     temp_model_repo = setup_temp_model_repo()
-    temp_model_path = os.path.join(temp_model_repo, "temp.pt")
+    temp_model_path = os.path.join(temp_model_repo, f"{model_name}.pt")
 
     print(f"Saving temp model at {temp_model_path}")
     torch.save(model.state_dict(), temp_model_path)
 
-def load_model(model):
+def load_model(model, model_name = "temp"):
     temp_model_repo = setup_temp_model_repo()
-    temp_model_path = os.path.join(temp_model_repo, "temp.pt")
+    temp_model_path = os.path.join(temp_model_repo, f"{model_name}.pt")
 
     print(f"Loading temp model from {temp_model_path}")
     model.load_state_dict(torch.load(temp_model_path))
 
-    delete_temp_models()
+    delete_temp_model()
 
 def train_on_batch(model, batch, optim, loss_fn, n_classes, device):
     # Get the Xs and Ys
