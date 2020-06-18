@@ -7,6 +7,8 @@ from mapping.mapping_models.sbert import SBertMapper
 from mapping.mapping_models.sbert_wk import SBertWKMapper
 from mapping.mapping_models.gem import GemMapper
 from mapping.mapping_models.t5_vanilla import T5VanillaMapper
+from mapping.mapping_models.ensemble import EnsembleMapper
+from mapping.mapping_models.bert_cls_trained import BertClsTrainedMapper
 
 MAPPER_DICT = {
     "use": UseMapper,
@@ -18,6 +20,8 @@ MAPPER_DICT = {
     "sbert_wk": SBertWKMapper,
     "gem": GemMapper,
     "t5_vanilla": T5VanillaMapper,
+    "ensemble": EnsembleMapper,
+    "bert_cls_trained": BertClsTrainedMapper,
 }
 
 def map_data(list_of_datasets, list_of_mappings):
