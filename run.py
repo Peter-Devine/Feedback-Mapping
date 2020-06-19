@@ -6,10 +6,14 @@ from visualisation.visualise import visualise_data
 
 from clustering.clusterer import cluster_data
 
-datasets = ["williams_2017"]
-embeddings = ["glove"]
+from utils.utils import get_random_seed, set_random_seed
 
-get_data(datasets, random_state=111)
+datasets = ["guzman_2015", "williams_2017"]
+embeddings = ["bert_cls_trained"]
+
+set_random_seed(111)
+
+get_data(datasets)
 
 map_data(datasets, embeddings)
 

@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import homogeneity_score
 from sklearn.metrics import pairwise_distances_argmin_min
 
-from utils.utils import create_dir
+from utils.utils import create_dir, get_random_seed
 
 def cluster_data(list_of_datasets, list_of_embeddings):
     run_all = bool(len(list_of_embeddings) < 1)
@@ -92,7 +92,7 @@ def get_embedding_data(embedding_file):
 def cluster_kmeans(embeddings, labels):
     # Cluster values into k clusters where k is the number of unique labels in the dataset
     n_clusters = len(labels.unique())
-    kmeans = KMeans(n_clusters=n_clusters, random_state=0)
+    kmeans = KMeans(n_clusters=n_clusters, random_state=get_random_seed())
 
     # Get the predicted cluster number for each embedding
     preds = kmeans.fit_predict(embeddings)
