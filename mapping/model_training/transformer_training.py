@@ -19,8 +19,8 @@ def train_cls(train_df, val_df, model_name, batch_size, max_len, device, params)
     model.zero_grad()
 
     # Tokenize and convert to input IDs
-    X_train = get_inputs(train_df.text)
-    X_val = get_inputs(val_df.text)
+    X_train = get_inputs(train_df.text, tokenizer, max_len)
+    X_val = get_inputs(val_df.text, tokenizer, max_len)
 
     # Get labels for each observation
     y_train, label_dict = get_labels(train_df)
@@ -55,10 +55,10 @@ def train_nsp(train_df, val_df, model_name, batch_size, max_len, device, params)
     model.zero_grad()
 
     # Tokenize and convert to input IDs
-    X_train_first = get_inputs(train_df.first_text)
-    X_train_second = get_inputs(train_df.second_text)
-    X_val_first = get_inputs(val_df.first_text)
-    X_val_second = get_inputs(val_df.second_text)
+    X_train_first = get_inputs(train_df.first_text, tokenizer, max_len)
+    X_train_second = get_inputs(train_df.second_text, tokenizer, max_len)
+    X_val_first = get_inputs(val_df.first_text, tokenizer, max_len)
+    X_val_second = get_inputs(val_df.second_text, tokenizer, max_len)
 
     # Get labels for each observation
     y_train = torch.LongTensor(np.stack(train_df.label.values))
@@ -82,7 +82,7 @@ def train_nsp(train_df, val_df, model_name, batch_size, max_len, device, params)
 
     return model
 
-def get_inputs(text_series):
+def get_inputs(text_series, tokenizer, max_len):
     return tokenizer.batch_encode_plus(list(text_series.values), max_length = max_len, pad_to_max_length=True, return_tensors="pt")["input_ids"]
 
 def get_labels(df, label_dict = None):
