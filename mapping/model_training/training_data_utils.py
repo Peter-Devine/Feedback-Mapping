@@ -31,16 +31,20 @@ def get_next_sentence_df(df):
     # Maybe comment this line out, might make training better, as we will have more examples of splits
     matched_df = matched_df.groupby('id', group_keys=False).apply(lambda df: df.sample(1, random_state = get_random_seed()))
 
-    # Again, maybe comment below out to allow the same sentence to be matched and unmatched
-    unmatched_df = two_text_df.sample(frac=0.5, random_state = get_random_seed())
-    matched_df = matched_df.drop(unmatched_df.index)
+    unmatched_df = matched_df.apply(lambda x: matched_df[matched_df.label != x["id"]].sample(1, random_state = get_random_seed()).iloc[0], axis=1)
 
-    unmatched_df = unmatched_df.sample(frac=1, random_state = get_random_seed())
-    shifted_unmatched_df = unmatched_df.shift(periods=1)
-    shifted_text = shifted_unmatched_df["second_text"]
-    shifted_text.iloc[0] = unmatched_df["second_text"].iloc[-1]
+    unmatched_df["second_text"] = matched_df["second_text"]
 
-    unmatched_df["second_text"] = shifted_text
+    # # Again, maybe comment below out to allow the same sentence to be matched and unmatched
+    # unmatched_df = matched_df.sample(frac=0.5, random_state = get_random_seed())
+    # matched_df = matched_df.drop(unmatched_df.index)
+    #
+    # unmatched_df = unmatched_df.sample(frac=1, random_state = get_random_seed())
+    # shifted_unmatched_df = unmatched_df.shift(periods=1)
+    # shifted_text = shifted_unmatched_df["second_text"]
+    # shifted_text.iloc[0] = unmatched_df["second_text"].iloc[-1]
+    #
+    # unmatched_df["second_text"] = shifted_text
 
     unmatched_df["label"] = 0
     matched_df["label"] = 1
