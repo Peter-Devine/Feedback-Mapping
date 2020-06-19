@@ -5,10 +5,10 @@ import os
 
 from tqdm import tqdm
 
-from mapping.model_training.transformer_models import get_cls_model_and_optimizer
+from mapping.model_training.transformer_models import get_cls_model_and_optimizer, get_nsp_model_and_optimizer
 from mapping.model_training.transformer_eval import create_eval_engine
 
-def train_cls(train_df, val_df, model_name, batch_size, max_len, device):
+def train_cls(train_df, val_df, model_name, batch_size, max_len, device, params):
 
     # Load pre-trained model tokenizer (vocabulary)
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
@@ -18,18 +18,9 @@ def train_cls(train_df, val_df, model_name, batch_size, max_len, device):
     model = model.to(device)
     model.zero_grad()
 
-    def get_inputs(df):
-        return tokenizer.batch_encode_plus(list(df.text.values), max_length = max_len, pad_to_max_length=True, return_tensors="pt")["input_ids"]
-
-    def get_labels(df, label_dict = None):
-        if label_dict is None:
-            label_dict = {label: i for i, label in enumerate(df.label.unique())}
-        int_labels = df.label.apply(lambda x: label_dict[x])
-        return torch.LongTensor(np.stack(int_labels.values)), label_dict
-
     # Tokenize and convert to input IDs
-    X_train = get_inputs(train_df)
-    X_val = get_inputs(val_df)
+    X_train = get_inputs(train_df.text)
+    X_val = get_inputs(val_df.text)
 
     # Get labels for each observation
     y_train, label_dict = get_labels(train_df)
@@ -40,18 +31,65 @@ def train_cls(train_df, val_df, model_name, batch_size, max_len, device):
     val_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_val, y_val), batch_size=batch_size, shuffle=False)
 
     n_classes = len(train_df.label.unique())
-    lr = 5e-5
-    eps = 1e-6
-    wd = 0.01
+    lr = params["lr"]
+    eps = params["eps"]
+    wd = params["wd"]
     training_model, optimizer = get_cls_model_and_optimizer(model, n_classes, lr, eps, wd, device)
 
     loss_fn = torch.nn.CrossEntropyLoss()
 
-    epochs = 3
-    patience = 2
+    epochs = params["epochs"]
+    patience = params["patience"]
     model = train_on_dataset(training_model, train_loader, val_loader, optimizer, loss_fn, n_classes, epochs, patience, device)
 
     return model
+
+def train_nsp(train_df, val_df, model_name, batch_size, max_len, device, params):
+
+    # Load pre-trained model tokenizer (vocabulary)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+
+    # Load the BERT model
+    model = AutoModel.from_pretrained(model_name)
+    model = model.to(device)
+    model.zero_grad()
+
+    # Tokenize and convert to input IDs
+    X_train_first = get_inputs(train_df.first_text)
+    X_train_second = get_inputs(train_df.second_text)
+    X_val_first = get_inputs(val_df.first_text)
+    X_val_second = get_inputs(val_df.second_text)
+
+    # Get labels for each observation
+    y_train = torch.LongTensor(np.stack(train_df.label.values))
+    y_val = torch.LongTensor(np.stack(val_df.label.values))
+
+    # Batch tensor so we can iterate over inputs
+    train_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_train_first, X_train_second, y_train), batch_size=batch_size, shuffle=True)
+    val_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_val_first, X_val_second, y_val), batch_size=batch_size, shuffle=False)
+
+    lr = params["lr"]
+    eps = params["eps"]
+    wd = params["wd"]
+    training_model, optimizer = get_nsp_model_and_optimizer(model, lr, eps, wd, device)
+
+    loss_fn = torch.nn.CrossEntropyLoss()
+
+    epochs = params["epochs"]
+    patience = params["patience"]
+    n_classes = 2
+    model = train_on_dataset(training_model, train_loader, val_loader, optimizer, loss_fn, n_classes, epochs, patience, device)
+
+    return model
+
+def get_inputs(text_series):
+    return tokenizer.batch_encode_plus(list(text_series.values), max_length = max_len, pad_to_max_length=True, return_tensors="pt")["input_ids"]
+
+def get_labels(df, label_dict = None):
+    if label_dict is None:
+        label_dict = {label: i for i, label in enumerate(df.label.unique())}
+    int_labels = df.label.apply(lambda x: label_dict[x])
+    return torch.LongTensor(np.stack(int_labels.values)), label_dict
 
 def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patience, device):
 
@@ -89,6 +127,27 @@ def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patie
     load_model(model)
 
     return model.lang_model
+
+
+def train_on_batch(model, batch, optim, loss_fn, n_classes, device):
+    # Get the Xs and Ys
+    inputs = batch[:-1]
+    golds = batch[-1].to(device)
+
+    # Put the Xs into the model
+    logits = model(inputs)
+
+    # Get the loss between the model outputs and the gold values
+    loss = loss_fn(logits.view(-1, n_classes), golds.view(-1))
+
+    #Backpropagate the error through the model
+    loss.backward()
+    optim.step()
+    # Reset the gradient of the model
+    model.zero_grad()
+    optim.zero_grad()
+
+    return loss.item()
 
 def check_best(model, epochs_since_last_best, target_score, best_score, patience):
 
@@ -135,22 +194,3 @@ def load_model(model, model_name = "temp"):
     model.load_state_dict(torch.load(temp_model_path))
 
     delete_temp_model()
-
-def train_on_batch(model, batch, optim, loss_fn, n_classes, device):
-    # Get the Xs and Ys
-    inputs = batch[:-1]
-    golds = batch[-1].to(device)
-
-    # Put the Xs into the model
-    logits = model(inputs)
-
-    # Get the loss between the model outputs and the gold values
-    loss = loss_fn(logits.view(-1, n_classes), golds.view(-1))
-
-    #Backpropagate the error through the model
-    loss.backward()
-    optim.step()
-    # Reset the gradient of the model
-    model.zero_grad()
-
-    return loss.item()
