@@ -52,6 +52,8 @@ def get_nsp_model_and_optimizer(language_model, lr, eps, wd, device):
           x2 = self.lang_model(input_ids=x2.to(device))
           sim = self.cos(x1[0].mean(dim=1), x2[0].mean(dim=1))
 
+          sim = sim.view(-1)
+
           sim = (sim + 1) / 2
           sim_complement = 1 - sim
 
