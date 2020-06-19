@@ -3,3 +3,4 @@ data/embeddings/
 data/raw/
 results/
 mapping/mapping_models/saved_models/
+.ipynb_checkpoints/
