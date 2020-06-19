@@ -5,16 +5,7 @@ import torch
 
 def create_eval_engine(model, n_classes, device):
 
-    def process_function(engine, batch):
-
-        with torch.no_grad():
-            X = batch[:-1]
-            y = batch[-1]
-
-            pred = model(X)
-            gold = y.to(device)
-
-        return pred, gold
+    process_function = get_process_function(model, device)
 
     eval_engine = Engine(process_function)
 
@@ -44,3 +35,16 @@ def create_eval_engine(model, n_classes, device):
     avg_precision.attach(eval_engine, "average precision")
 
     return eval_engine
+
+def get_process_function(model, device):
+    def process_function(engine, batch):
+
+        with torch.no_grad():
+            X = batch[:-1]
+            y = batch[-1]
+
+            pred = model(X)
+            gold = y.to(device)
+
+        return pred, gold
+    return process_function
