@@ -29,7 +29,7 @@ def get_next_sentence_df(df):
     matched_df = get_two_text_df(all_split_df)
 
     # Maybe comment this line out, might make training better, as we will have more examples of splits
-    matched_df = matched_df.groupby('id', group_keys=False).apply(lambda df: df.sample(1, random_state = get_random_seed()))
+    # matched_df = matched_df.groupby('id', group_keys=False).apply(lambda df: df.sample(1, random_state = get_random_seed()))
 
     # Again, maybe comment below out to allow the same sentence to be matched and unmatched
     unmatched_df = matched_df.sample(frac=0.5, random_state = get_random_seed())
@@ -59,6 +59,6 @@ def get_two_text_df(split_df):
 
     two_text_pd = pd.DataFrame({"first_text": first_splits,
                  "second_text": second_splits,
-                 "id": ids}, index = ids)
+                 "id": ids})
 
     return two_text_pd
