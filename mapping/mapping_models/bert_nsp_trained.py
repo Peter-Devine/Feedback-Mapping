@@ -10,7 +10,7 @@ from tqdm import tqdm
 import torch
 from transformers import AutoTokenizer, AutoModel
 from mapping.mapping_models.mapping_models_base import BaseMapper
-from mapping.model_training.transformer_training import train_cls
+from mapping.model_training.transformer_training import train_nsp
 from mapping.model_training.training_data_utils import get_next_sentence_df
 
 class BertNspTrainedMapper(BaseMapper):
