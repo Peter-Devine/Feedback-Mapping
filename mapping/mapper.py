@@ -9,6 +9,7 @@ from mapping.mapping_models.gem import GemMapper
 from mapping.mapping_models.t5_vanilla import T5VanillaMapper
 from mapping.mapping_models.ensemble import EnsembleMapper
 from mapping.mapping_models.bert_cls_trained import BertClsTrainedMapper
+from mapping.mapping_models.bert_nsp_trained import BertNspTrainedMapper
 
 MAPPER_DICT = {
     "use": UseMapper,
@@ -22,6 +23,7 @@ MAPPER_DICT = {
     "t5_vanilla": T5VanillaMapper,
     "ensemble": EnsembleMapper,
     "bert_cls_trained": BertClsTrainedMapper,
+    "bert_nsp_trained": BertNspTrainedMapper,
 }
 
 def map_data(list_of_datasets, list_of_mappings):
