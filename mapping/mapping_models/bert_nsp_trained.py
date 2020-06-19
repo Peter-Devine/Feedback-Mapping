@@ -41,7 +41,7 @@ class BertNspTrainedMapper(BaseMapper):
 
         # Make sure the torch algorithm runs without gradients (as we aren't training)
         with torch.no_grad():
-            print(f"Iterating over inputs {self.model_name} cls trained")
+            print(f"Iterating over inputs {self.model_name} NSP trained")
             # Iterate over all batches, passing the batches through the
             for test_batch in tqdm(test_loader):
                 # See the models docstrings for the detail of the inputs
@@ -68,11 +68,11 @@ class BertNspTrainedMapper(BaseMapper):
         model = AutoModel.from_pretrained(self.model_name)
 
         if not os.path.exists(model_path):
-            print(f"Running BERT classification training on {self.test_dataset}")
+            print(f"Running BERT NSP training on {self.test_dataset}")
             self.train_model(model_path)
 
 
-        print(f"Loading BERT classification model trained on {self.test_dataset}")
+        print(f"Loading BERT NSP model trained on {self.test_dataset}")
         model.load_state_dict(torch.load(model_path, map_location=self.device))
 
         return model
