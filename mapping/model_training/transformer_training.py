@@ -103,6 +103,8 @@ def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patie
     best_score = 0
 
     for epoch in tqdm(range(epochs), desc="Epoch"):
+        torch.cuda.empty_cache()
+
         # Train on all batches
         model.train()
         batch_progress = tqdm(train, desc="Batch")
