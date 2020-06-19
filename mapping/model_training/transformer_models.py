@@ -41,7 +41,7 @@ def get_nsp_model_and_optimizer(language_model, lr, eps, wd, device):
 
     class NextSentenceLanguageModel(nn.Module):
       def __init__(self, lang_model):
-          super(ClassificationLanguageModel, self).__init__()
+          super(NextSentenceLanguageModel, self).__init__()
           self.lang_model = lang_model
           hidden_size = language_model.config.hidden_size if "hidden_size" in vars(language_model.config).keys() else language_model.config.dim
           self.cos = nn.CosineSimilarity(dim=1, eps=1e-6)
