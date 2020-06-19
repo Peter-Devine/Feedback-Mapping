@@ -1,6 +1,8 @@
 import torch
 from transformers import AutoTokenizer, AutoModel
 
+import numpy as np
+
 import os
 
 from tqdm import tqdm
