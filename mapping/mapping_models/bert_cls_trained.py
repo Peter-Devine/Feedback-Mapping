@@ -46,7 +46,7 @@ class BertClsTrainedMapper(BaseMapper):
                 # See the models docstrings for the detail of the inputs
                 outputs = model(test_batch.to(self.device))
                 # Output the final average encoding across all characters as a numpy array
-                np_array = outputs[0].mean(dim=1).numpy()
+                np_array = outputs[0].mean(dim=1).cpu().numpy()
                 # Append this encoding to a list
                 embeddings.append(np_array)
 
