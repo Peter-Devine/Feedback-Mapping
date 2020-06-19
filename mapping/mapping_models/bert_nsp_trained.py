@@ -84,7 +84,15 @@ class BertNspTrainedMapper(BaseMapper):
         train_df = get_next_sentence_df(train_df)
         valid_df = get_next_sentence_df(valid_df)
 
-        model = train_nsp(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device)
+        params = {
+            "lr": 5e-5,
+            "eps": 1e-6,
+            "wd": 0.01,
+            "epochs": 20,
+            "patience": 5
+        }
+
+        model = train_nsp(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device, params)
 
         torch.save(model.state_dict(), model_path)
 
