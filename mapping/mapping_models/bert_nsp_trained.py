@@ -58,7 +58,7 @@ class BertNspTrainedMapper(BaseMapper):
     def set_parameters(self):
         self.model_name = 'binwang/bert-base-nli'
         self.max_length = 128
-        self.batch_size = 64
+        self.batch_size = 32
 
     def get_model(self):
         model_path = os.path.join(self.model_dir, f"{self.test_dataset}.pt")
