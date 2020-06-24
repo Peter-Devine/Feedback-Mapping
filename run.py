@@ -12,7 +12,7 @@ datasets = ["guzman_2015", "williams_2017"]
 embeddings = ["bert_cls_trained"]
 
 set_random_seed(111)
-
+print("!!!!!!!!!!!")
 get_data(datasets)
 
 map_data(datasets, embeddings)
