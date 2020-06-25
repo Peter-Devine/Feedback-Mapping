@@ -1,7 +1,6 @@
 import requests
 import zipfile
 import time
-import json
 import os
 import io
 import sqlite3
@@ -24,6 +23,8 @@ class Tizard2019(DownloadUtilBase):
         column_names = [x[1] for x in db.execute("""PRAGMA table_info('labelled_sentences');""")]
 
         row_data = [row for row in db.execute("SELECT * from labelled_sentences")]
+
+        db.close()
 
         df = pd.DataFrame(row_data, columns=column_names)
 
