@@ -7,6 +7,7 @@ from data.di_sorbo_2016 import DiSorbo2016
 from data.scalabrino_2017 import Scalabrino2017
 from data.jha_2017 import Jha2017
 from data.tizard_2019 import Tizard2019
+from data.morales_ramirez_2019 import MoralesRamirez2019
 
 from utils.utils import get_random_seed
 
@@ -25,6 +26,7 @@ def get_single_dataset(dataset):
         "scalabrino_2017": Scalabrino2017,
         "jha_2017": Jha2017,
         "tizard_2019": Tizard2019,
+        "morales_ramirez_2019": MoralesRamirez2019,
     }
 
     DOWNLOAD_DIR = os.path.join(".", "data", "raw")
