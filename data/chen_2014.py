@@ -34,9 +34,11 @@ class Chen2014(DownloadUtilBase):
         shutil.rmtree(task_data_path)
 
         train_and_val = train_info.append(train_noninfo)
+        train_and_val = train_and_val.reset_index(drop=True)
 
         train = train_and_val.sample(frac=0.7, random_state=self.random_state)
         val = train_and_val.drop(train.index)
         test = test_info.append(test_noninfo)
+        test = test.reset_index(drop=True)
 
         super(Chen2014, self).download(train, val, test)
