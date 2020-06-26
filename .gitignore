@@ -1,6 +1,8 @@
 __pycache__/
 data/embeddings/
 data/raw/
-results/
+results/examples/
+results/scores/
+results/visualisations/
 mapping/mapping_models/saved_models/
 .ipynb_checkpoints/
