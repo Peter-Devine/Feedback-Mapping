@@ -106,15 +106,15 @@ def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patie
         torch.cuda.empty_cache()
 
         # Train on all batches
-        model.train()
         batch_progress = tqdm(train, desc="Batch")
         for batch in batch_progress:
             loss = train_on_batch(model, batch, optim, loss_fn, n_classes, device)
             batch_progress.set_description(f"Batch loss {loss}")
 
         # Eval on validation set
-        model.eval()
+        model = model.eval()
         results = eval_engine.run(val).metrics
+        model = model.train()
 
         # Calculate whether patience has been exceeded or not on the target metric
         target_score = results[TARGET_METRIC]
