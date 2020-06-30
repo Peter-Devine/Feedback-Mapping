@@ -97,6 +97,9 @@ class BertNspTrainedMtlMapper(BaseMapper):
         train_df = get_concat_next_sentence_df(train_dfs)
         valid_df = get_concat_next_sentence_df(valid_dfs)
 
+        self.save_preprocessed_df(train_df, f"train")
+        self.save_preprocessed_df(valid_df, f"val")
+
         params = {
             "lr": 5e-5,
             "eps": 1e-6,
