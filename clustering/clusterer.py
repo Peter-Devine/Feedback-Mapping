@@ -119,7 +119,7 @@ def score_clustering(labels, preds):
 
 def get_cluster_compositions(labels, preds):
     # Find what % of each cluster is any given label
-    return pd.DataFrame({"labels": labels, "preds": preds}).groupby("preds")["label"].value_counts(normalize=True)
+    return pd.DataFrame({"label": labels, "pred": preds}).groupby("pred")["label"].value_counts(normalize=True)
 
 def get_examples_idx(kmeans, embeddings):
     # Get the indices of the observations closest to the centroid for each cluster
