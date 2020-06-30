@@ -85,7 +85,7 @@ def train_nsp(train_df, val_df, model_name, batch_size, max_len, device, params)
     return model
 
 def get_inputs(text_series, tokenizer, max_len):
-    return tokenizer.batch_encode_plus(list(text_series.values), max_length = max_len, pad_to_max_length=True, return_tensors="pt")["input_ids"]
+    return tokenizer.batch_encode_plus(list(text_series.values), max_length = max_len, pad_to_max_length=True, truncation=True, return_tensors="pt")["input_ids"]
 
 def get_labels(df, label_dict = None):
     if label_dict is None:

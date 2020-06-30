@@ -30,7 +30,7 @@ class BertNspTrainedMtlMapper(BaseMapper):
         model.zero_grad()
 
         # Tokenize and convert to input IDs
-        tokens_tensor = tokenizer.batch_encode_plus(list(df.text.values), max_length = self.max_length, pad_to_max_length=True, return_tensors="pt")
+        tokens_tensor = tokenizer.batch_encode_plus(list(df.text.values), max_length = self.max_length, pad_to_max_length=True, truncation=True, return_tensors="pt")
         tokens_tensor = tokens_tensor["input_ids"]
 
         # Create list for all embeddings to be saved to
