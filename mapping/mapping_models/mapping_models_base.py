@@ -19,6 +19,10 @@ class BaseMapper:
         self.output_dataset_dir = os.path.join(self.overall_dataset_dir, "embeddings")
         create_dir(self.output_dataset_dir)
 
+        # Preprocessed dir
+        self.preprocessed_dataset_dir = os.path.join(self.overall_dataset_dir, "preprocessed")
+        create_dir(self.preprocessed_dataset_dir)
+
         # Get mapping name
         self.mapping_name = self.get_mapping_name(test_dataset)
 
@@ -42,8 +46,24 @@ class BaseMapper:
         # Get the path of this dataset
         dataset_path = os.path.join(self.raw_dataset_dir, dataset, f"{split}.csv")
 
+        assert os.path.exists(dataset_path), f"No file found at {dataset_path}"
+
         # Return the df of this csv dataset
         return pd.read_csv(dataset_path, index_col = 0)
+
+    def save_preprocessed_df(self, df, filename):
+        df.to_csv(os.path.join(self.preprocessed_dataset_dir, self.mapping_name, self.test_dataset, f"{filename}.csv"))
+
+    def get_all_datasets(self, split):
+        all_datasets = {}
+
+        # Iterate over each folder in the raw data folder to find distinct datasets
+        for item in os.listdir(self.raw_dataset_dir):
+            if os.path.isdir(item):
+                all_datasets[item] = self.get_dataset(item, split)
+
+        # Return the df of all datasets in raw folder
+        return all_datasets
 
     def output_embeddings(self, embedding, labels):
         # Make sure the embedding folder exists
