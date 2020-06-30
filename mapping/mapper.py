@@ -10,6 +10,7 @@ from mapping.mapping_models.t5_vanilla import T5VanillaMapper
 from mapping.mapping_models.ensemble import EnsembleMapper
 from mapping.mapping_models.bert_cls_trained import BertClsTrainedMapper
 from mapping.mapping_models.bert_nsp_trained import BertNspTrainedMapper
+from mapping.mapping_models.bert_nsp_trained_mtl import BertNspTrainedMtlMapper
 
 MAPPER_DICT = {
     "use": UseMapper,
@@ -24,6 +25,7 @@ MAPPER_DICT = {
     "ensemble": EnsembleMapper,
     "bert_cls_trained": BertClsTrainedMapper,
     "bert_nsp_trained": BertNspTrainedMapper,
+    "bert_nsp_trained_mtl": BertNspTrainedMtlMapper,
 }
 
 def map_data(list_of_datasets, list_of_mappings):
