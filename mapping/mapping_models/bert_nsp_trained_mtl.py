@@ -104,8 +104,8 @@ class BertNspTrainedMtlMapper(BaseMapper):
             "lr": 5e-5,
             "eps": 1e-6,
             "wd": 0.01,
-            "epochs": 20,
-            "patience": 5
+            "epochs": 5,
+            "patience": 2
         }
 
         model = train_nsp(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device, params)

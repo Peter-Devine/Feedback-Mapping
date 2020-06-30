@@ -61,7 +61,7 @@ class BaseMapper:
 
         # Iterate over each folder in the raw data folder to find distinct datasets
         for item in os.listdir(self.raw_dataset_dir):
-            if os.path.isdir(item):
+            if os.path.isdir(os.path.join(self.raw_dataset_dir, item)):
                 all_datasets[item] = self.get_dataset(item, split)
 
         # Return the df of all datasets in raw folder
