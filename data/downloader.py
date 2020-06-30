@@ -36,4 +36,5 @@ def get_single_dataset(dataset):
     dataset_download_dir = os.path.join(DOWNLOAD_DIR, dataset)
     if not os.path.exists(dataset_download_dir):
         downloader = DOWNLOADER_DICT[dataset](random_state = get_random_seed(), download_dir = dataset_download_dir)
+        print(f"Downloading {dataset}")
         downloader.download()
