@@ -31,28 +31,36 @@ def cluster_single_dataset(dataset_name, embedding_file, embedding_name):
     # Score predictions compared to golds
     scores = score_clustering(labels, preds)
 
+    # Get the compositions of each cluster
+    compositions = get_cluster_compositions(labels, preds)
+
     # Get the indices of the observations closest to the centroid for each cluster
     closest_idx = get_examples_idx(kmeans, embeddings)
 
     # Get the text of the observations closest to the centroid for each cluster
     example_obs = get_examples_text(closest_idx, dataset_name)
 
-    output_results(scores, example_obs, dataset_name, embedding_name)
+    output_results(scores, compositions, example_obs, dataset_name, embedding_name)
 
-def output_results(scores_df, example_obs_df, dataset_name, embedding_name):
+def output_results(scores_df, compositions_df, example_obs_df, dataset_name, embedding_name):
 
     results_dir = os.path.join(".", "results")
     create_dir(results_dir)
     scores_dir = os.path.join(results_dir, "scores")
     create_dir(scores_dir)
+    compositions_dir = os.path.join(results_dir, "compositions")
+    create_dir(compositions_dir)
     examples_dir = os.path.join(results_dir, "examples")
     create_dir(examples_dir)
     dataset_scores_dir = os.path.join(scores_dir, dataset_name)
     create_dir(dataset_scores_dir)
+    dataset_compositions_dir = os.path.join(compositions_dir, dataset_name)
+    create_dir(dataset_compositions_dir)
     dataset_examples_dir = os.path.join(examples_dir, dataset_name)
     create_dir(dataset_examples_dir)
 
     scores_df.to_csv(os.path.join(dataset_scores_dir, f"{embedding_name}.csv"))
+    compositions_df.to_csv(os.path.join(dataset_compositions_dir, f"{embedding_name}.csv"))
     example_obs_df.to_csv(os.path.join(dataset_examples_dir, f"{embedding_name}.csv"))
 
 def get_embeddings_paths(dataset_name):
@@ -108,6 +116,10 @@ def score_clustering(labels, preds):
     scorings = {}
     scorings["homogeneity"] = homogeneity_score(labels, preds)
     return pd.DataFrame(scorings, index=["scorings"])
+
+def get_cluster_compositions(labels, preds):
+    # Find what % of each cluster is any given label
+    return pd.DataFrame({"labels": labels, "preds": preds}).groupby("preds")["label"].value_counts(normalize=True)
 
 def get_examples_idx(kmeans, embeddings):
     # Get the indices of the observations closest to the centroid for each cluster
