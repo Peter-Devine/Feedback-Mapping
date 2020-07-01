@@ -3,6 +3,8 @@ import math
 import pandas as pd
 
 import os
+import requests
+import zipfile
 
 import numpy as np
 from tqdm import tqdm
