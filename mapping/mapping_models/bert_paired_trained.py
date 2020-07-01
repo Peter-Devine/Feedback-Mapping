@@ -75,8 +75,8 @@ class BertPairedTrainedMapper(BaseMapper):
         # Read the csv file, rename the columns to standardised names and only take a subset of the data
         aux_df = pd.read_csv(auxiliary_dataset_path)
         aux_df = aux_df.rename(columns={"issue_url": "id", "issue_title": "first_text", "body": "second_text"})
-        aux_train_df = aux_df.sample(n=50000, random_state = get_random_seed())
-        aux_val_df = aux_df.sample(n=50000, random_state = get_random_seed())
+        aux_train_df = aux_df.sample(n=100000, random_state = get_random_seed())
+        aux_val_df = aux_df.sample(n=1000, random_state = get_random_seed())
 
         # Make the data such that we have 50% paired and 50% unpaired
         paired_train_df = shuffle_paired_df(aux_train_df)
@@ -85,7 +85,7 @@ class BertPairedTrainedMapper(BaseMapper):
         return paired_train_df, paired_val_df
 
     def get_model(self):
-        model_path = os.path.join(self.model_dir, f"{self.test_dataset}.pt")
+        model_path = os.path.join(self.model_dir, f"paired.pt")
 
         self.set_parameters()
 
