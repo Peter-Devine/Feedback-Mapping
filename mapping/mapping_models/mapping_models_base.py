@@ -23,6 +23,10 @@ class BaseMapper:
         self.preprocessed_dataset_dir = os.path.join(self.overall_dataset_dir, "preprocessed")
         create_dir(self.preprocessed_dataset_dir)
 
+        # Preprocessed dir
+        self.auxiliary_dataset_dir = os.path.join(self.overall_dataset_dir, "auxiliary")
+        create_dir(self.auxiliary_dataset_dir)
+
         # Get mapping name
         self.mapping_name = self.get_mapping_name(test_dataset)
 
@@ -52,9 +56,9 @@ class BaseMapper:
         return pd.read_csv(dataset_path, index_col = 0)
 
     def save_preprocessed_df(self, df, filename):
-        proprocessed_mapping_dir = os.path.join(self.preprocessed_dataset_dir, self.mapping_name)
-        create_dir(proprocessed_mapping_dir)
-        df.to_csv(os.path.join(proprocessed_mapping_dir, f"{filename}.csv"))
+        preprocessed_mapping_dir = os.path.join(self.preprocessed_dataset_dir, self.mapping_name)
+        create_dir(preprocessed_mapping_dir)
+        df.to_csv(os.path.join(preprocessed_mapping_dir, f"{filename}.csv"))
 
     def get_all_datasets(self, split):
         all_datasets = {}
