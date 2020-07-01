@@ -74,7 +74,7 @@ class BertPairedTrainedMapper(BaseMapper):
 
         # Read the csv file, rename the columns to standardised names and only take a subset of the data
         aux_df = pd.read_csv(auxiliary_dataset_path)
-        aux_df = aux_df.rename({"issue_url": "id", "issue_title": "first_text", "body": "second_text"})
+        aux_df = aux_df.rename(columns={"issue_url": "id", "issue_title": "first_text", "body": "second_text"})
         aux_train_df = aux_df.sample(n=50000, random_state = get_random_seed())
         aux_val_df = aux_df.sample(n=50000, random_state = get_random_seed())
 
