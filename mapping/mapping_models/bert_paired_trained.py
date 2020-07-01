@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import requests
 import zipfile
+import io
 
 import numpy as np
 from tqdm import tqdm
