@@ -60,6 +60,21 @@ class BaseMapper:
         create_dir(preprocessed_mapping_dir)
         df.to_csv(os.path.join(preprocessed_mapping_dir, f"{filename}.csv"))
 
+    def read_or_create_model(self, model_file_path):
+        self.set_parameters()
+
+        model = AutoModel.from_pretrained(self.model_name)
+
+        if not os.path.exists(model_file_path):
+            print(f"Running training to create {model_file_path}")
+            self.train_model(model_file_path)
+
+
+        print(f"Loading model from {model_file_path}")
+        model.load_state_dict(torch.load(model_file_path, map_location=self.device))
+
+        return model
+
     def get_all_datasets(self, split):
         all_datasets = {}
 

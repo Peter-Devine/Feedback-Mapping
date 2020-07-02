@@ -46,7 +46,7 @@ def train_cls(train_df, val_df, model_name, batch_size, max_len, device, params)
 
     return model
 
-def train_nsp(train_df, val_df, model_name, batch_size, max_len, device, params):
+def train_sim(train_df, val_df, model_name, batch_size, max_len, device, params):
 
     # Load pre-trained model tokenizer (vocabulary)
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
