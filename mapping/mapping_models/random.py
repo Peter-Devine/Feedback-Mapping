@@ -14,5 +14,5 @@ class RandomMapper(BaseMapper):
 
         return embedding, df.label
 
-    def get_mapping_name(self, test_dataset):
-        return f"random"
+    def get_mapping_name(self):
+        return "random"

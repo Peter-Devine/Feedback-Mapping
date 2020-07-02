@@ -15,5 +15,5 @@ class TfidfPcaMapper(BaseMapper):
 
         return low_dim_embed, df.label
 
-    def get_mapping_name(self, test_dataset):
+    def get_mapping_name(self):
         return "tfidf_pca"

@@ -17,5 +17,5 @@ class SBertMapper(BaseMapper):
 
         return sentence_embeddings, df.label
 
-    def get_mapping_name(self, test_dataset):
+    def get_mapping_name(self):
         return "sbert"

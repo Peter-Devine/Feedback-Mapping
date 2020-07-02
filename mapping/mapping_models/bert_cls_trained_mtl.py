@@ -59,5 +59,5 @@ class BertClsTrainedMtlMapper(BaseMapper):
 
         torch.save(model.state_dict(), model_path)
 
-    def get_mapping_name(self, test_dataset):
+    def get_mapping_name(self):
         return f"bert_cls_trained_mtl"

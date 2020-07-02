@@ -171,5 +171,5 @@ class SBertWKMapper(BaseMapper):
 
         return sentence_embedding
 
-    def get_mapping_name(self, test_dataset):
+    def get_mapping_name(self):
         return "sbert-wk"

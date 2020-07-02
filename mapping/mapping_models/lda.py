@@ -17,5 +17,5 @@ class LdaMapper(BaseMapper):
 
         return embeddings, df.label
 
-    def get_mapping_name(self, test_dataset):
+    def get_mapping_name(self):
         return "lda"

@@ -40,8 +40,8 @@ class BaseMapper:
         self.model_dir = os.path.join(self.model_repo_dir, self.mapping_name)
         create_dir(self.model_dir)
 
-    def get_mapping_name(self, dataset_name):
-        raise NotImplementedError(f"get_mapping_name not implemented when running on {dataset_name} dataset")
+    def get_mapping_name(self):
+        raise NotImplementedError(f"get_mapping_name not implemented when running on {self.test_dataset} dataset")
 
     def get_dataset(self, dataset, split=None):
         # Clean splits input

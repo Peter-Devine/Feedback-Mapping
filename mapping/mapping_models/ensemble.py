@@ -21,5 +21,5 @@ class EnsembleMapper(BaseMapper):
 
         return concatenated_embedding, labels
 
-    def get_mapping_name(self, test_dataset):
+    def get_mapping_name(self):
         return f"ensemble"

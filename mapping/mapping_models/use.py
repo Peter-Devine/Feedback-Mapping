@@ -57,6 +57,6 @@ class UseMapper(BaseMapper):
 
         return embed
 
-    def get_mapping_name(self, test_dataset):
+    def get_mapping_name(self):
         # Use is dataset agnostic (I.e. we do not train it)
         return "use"

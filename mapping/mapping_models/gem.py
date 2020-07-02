@@ -34,7 +34,7 @@ class GemMapper(BaseMapper):
         embedding_matrix, vocab = get_embedding_matrix(glove_saved_file)
         return embedding_matrix, vocab
 
-    def get_mapping_name(self, test_dataset):
+    def get_mapping_name(self):
         return "gem"
 
 class SentenceEmbedder:

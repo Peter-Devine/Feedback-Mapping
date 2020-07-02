@@ -60,5 +60,5 @@ class GloveMapper(BaseMapper):
 
         return embeddings_dict
 
-    def get_mapping_name(self, test_dataset):
+    def get_mapping_name(self):
         return "glove"
