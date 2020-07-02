@@ -9,6 +9,7 @@ from mapping.mapping_models.gem import GemMapper
 from mapping.mapping_models.t5_vanilla import T5VanillaMapper
 from mapping.mapping_models.ensemble import EnsembleMapper
 from mapping.mapping_models.bert_cls_trained import BertClsTrainedMapper
+from mapping.mapping_models.bert_cls_trained_mtl import BertClsTrainedMtlMapper
 from mapping.mapping_models.bert_nsp_trained import BertNspTrainedMapper
 from mapping.mapping_models.bert_nsp_trained_mtl import BertNspTrainedMtlMapper
 from mapping.mapping_models.bert_paired_trained import BertPairedTrainedMapper
@@ -26,6 +27,7 @@ MAPPER_DICT = {
     "t5_vanilla": T5VanillaMapper,
     "ensemble": EnsembleMapper,
     "bert_cls_trained": BertClsTrainedMapper,
+    "bert_cls_trained_mtl": BertClsTrainedMtlMapper,
     "bert_nsp_trained": BertNspTrainedMapper,
     "bert_nsp_trained_mtl": BertNspTrainedMtlMapper,
     "bert_paired_trained": BertPairedTrainedMapper,
