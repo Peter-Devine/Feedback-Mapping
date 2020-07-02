@@ -2,6 +2,7 @@ import os
 import pandas as pd
 
 import torch
+from transformers import AutoModel
 
 from utils.utils import create_dir
 
