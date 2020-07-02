@@ -7,9 +7,9 @@ def get_lm_embeddings(mapper_model, test_df, trained_model_name):
     mapper_model.set_parameters()
 
     # Load pre-trained model tokenizer (vocabulary)
-    tokenizer = AutoTokenizer.from_pretrained(self.model_name, use_fast=True)
+    tokenizer = AutoTokenizer.from_pretrained(mapper_model.model_name, use_fast=True)
 
-    # Load the BERT model
+    # Load the language model
     model = mapper_model.get_model()
     model = model.to(mapper_model.device)
     model.eval()
