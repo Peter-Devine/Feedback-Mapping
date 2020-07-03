@@ -8,12 +8,12 @@ from mapping.mapping_models.sbert_wk import SBertWKMapper
 from mapping.mapping_models.gem import GemMapper
 from mapping.mapping_models.t5_vanilla import T5VanillaMapper
 from mapping.mapping_models.ensemble import EnsembleMapper
-from mapping.mapping_models.bert_cls_trained import BertClsTrainedMapper
-from mapping.mapping_models.bert_cls_trained_mtl import BertClsTrainedMtlMapper
-from mapping.mapping_models.bert_cls_trained_sim import BertClsTrainedSimMapper
-from mapping.mapping_models.bert_nsp_trained import BertNspTrainedMapper
-from mapping.mapping_models.bert_nsp_trained_mtl import BertNspTrainedMtlMapper
-from mapping.mapping_models.bert_paired_trained import BertPairedTrainedMapper
+from mapping.mapping_models.trained_experiments.bert_cls_trained import BertClsTrainedMapper
+from mapping.mapping_models.trained_experiments.bert_cls_trained_mtl import BertClsTrainedMtlMapper
+from mapping.mapping_models.trained_experiments.bert_cls_trained_sim import BertClsTrainedSimMapper
+from mapping.mapping_models.trained_experiments.bert_nsp_trained import BertNspTrainedMapper
+from mapping.mapping_models.trained_experiments.bert_nsp_trained_mtl import BertNspTrainedMtlMapper
+from mapping.mapping_models.trained_experiments.bert_paired_trained import BertPairedTrainedMapper
 from mapping.mapping_models.random import RandomMapper
 
 MAPPER_DICT = {
