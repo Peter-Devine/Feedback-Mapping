@@ -31,10 +31,10 @@ def pair_class_df(class_df, class_column="label"):
         first_texts = class_df[class_df[class_column]==unique_class].text.sample(frac=1)
         # Shift all these shuffled texts along one
         second_texts = first_texts.shift(1)
-        second_texts.iloc[0] = df.first_text.iloc[-1]
+        second_texts.iloc[0] = first_texts.iloc[-1]
 
         # Paired both the shifted and unshifted texts together (Thus we make sure that each text has a different corresponding pair)
-        single_class_paired_df = pd.DataFrame({"first_text": first_text, "second_text": second_texts, "id": unique_class})
+        single_class_paired_df = pd.DataFrame({"first_text": first_texts, "second_text": second_texts, "id": unique_class})
 
         # Add this paired df for one class to overall paired df
         if paired_df is None:
