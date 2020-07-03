@@ -31,12 +31,14 @@ class Maalej2016(DownloadUtilBase):
         json_path = os.path.join(task_data_path, "REJ_data", "all.json")
 
         with open(json_path) as json_file:
-            data = json.load(json_file)
+            data = json.loads(json_file)
 
         shutil.rmtree(task_data_path)
 
-        df = pd.DataFrame({"text": [
-             x["title"] + " " + x["comment"] if x["title"] is not None else x["comment"] for x in data], "label": [x["label"] for x in data]})
+        df = pd.DataFrame(data)
+
+        df["title"] = df.title.fillna("")
+        df["text"] = df.title + df.title.apply(lambda x: "" if len(x)<1 else ". ") + df.comment
 
         train_and_val = df.sample(frac=0.8, random_state=self.random_state)
         train = train_and_val.sample(frac=0.7, random_state=self.random_state)
