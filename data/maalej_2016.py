@@ -31,7 +31,7 @@ class Maalej2016(DownloadUtilBase):
         json_path = os.path.join(task_data_path, "REJ_data", "all.json")
 
         with open(json_path) as json_file:
-            data = json.loads(json_file)
+            data = json.load(json_file)
 
         shutil.rmtree(task_data_path)
 
