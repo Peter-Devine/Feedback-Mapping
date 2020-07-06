@@ -19,7 +19,7 @@ class BertNspTrainedMapper(BaseMapper):
     def get_embeds(self):
         test_df = self.get_dataset(self.test_dataset, split="test")
 
-        all_embeddings = get_lm_embeddings(self, test_df, f"{self.model_name} NSP trained")
+        all_embeddings = get_lm_embeddings(self, test_df, f"{self.test_dataset} train NSP trained")
 
         return all_embeddings, test_df.label
 
