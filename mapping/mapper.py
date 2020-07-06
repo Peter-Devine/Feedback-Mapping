@@ -13,6 +13,8 @@ from mapping.mapping_models.trained_experiments.bert_cls_trained_mtl import Bert
 from mapping.mapping_models.trained_experiments.bert_cls_trained_sim import BertClsTrainedSimMapper
 from mapping.mapping_models.trained_experiments.bert_nsp_trained import BertNspTrainedMapper
 from mapping.mapping_models.trained_experiments.bert_nsp_trained_mtl import BertNspTrainedMtlMapper
+from mapping.mapping_models.trained_experiments.bert_nsp_trained_test import BertNspTrainedTestMapper
+from mapping.mapping_models.trained_experiments.bert_nsp_trained_test_and_train import BertNspTrainedTestAndTrainMapper
 from mapping.mapping_models.trained_experiments.bert_paired_trained import BertPairedTrainedMapper
 from mapping.mapping_models.random import RandomMapper
 
@@ -31,6 +33,8 @@ MAPPER_DICT = {
     "bert_cls_trained_mtl": BertClsTrainedMtlMapper,
     "bert_cls_trained_sim": BertClsTrainedSimMapper,
     "bert_nsp_trained": BertNspTrainedMapper,
+    "bert_nsp_trained_test": BertNspTrainedTestMapper,
+    "bert_nsp_trained_test_and_train": BertNspTrainedTestAndTrainMapper,
     "bert_nsp_trained_mtl": BertNspTrainedMtlMapper,
     "bert_paired_trained": BertPairedTrainedMapper,
     "random": RandomMapper,
