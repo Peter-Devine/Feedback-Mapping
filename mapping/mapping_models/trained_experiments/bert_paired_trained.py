@@ -14,7 +14,7 @@ import torch
 from transformers import AutoTokenizer, AutoModel
 from mapping.mapping_models.mapping_models_base import BaseMapper
 from mapping.model_training.transformer_training import train_sim
-from mapping.model_training.training_data_utils import shuffle_paired_df
+from mapping.model_training.training_data_utils import randomly_split_df, shuffle_paired_df
 from utils.utils import get_random_seed
 
 class BertPairedTrainedMapper(BaseMapper):
@@ -47,8 +47,12 @@ class BertPairedTrainedMapper(BaseMapper):
         aux_val_df = aux_df.sample(n=1000, random_state = get_random_seed())
 
         # Make the data such that we have 50% paired and 50% unpaired
-        paired_train_df = shuffle_paired_df(aux_train_df)
-        paired_val_df = shuffle_paired_df(aux_val_df)
+        first_train_df, second_train_df = randomly_split_df(aux_train_df)
+        first_val_df, second_val_df = randomly_split_df(aux_val_df)
+
+        # Then shuffle the second dfs so that they are unpaired
+        paired_train_df = shuffle_paired_df(first_train_df, second_train_df)
+        paired_val_df = shuffle_paired_df(first_val_df, second_val_df)
 
         return paired_train_df, paired_val_df
 

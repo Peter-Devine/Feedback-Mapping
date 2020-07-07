@@ -7,7 +7,7 @@ import torch
 from transformers import AutoModel
 from mapping.mapping_models.mapping_models_base import BaseMapper
 from mapping.model_training.transformer_training import train_sim
-from mapping.model_training.training_data_utils import pair_class_df, shuffle_paired_df
+from mapping.model_training.training_data_utils import get_cls_pair_matched_df
 from utils.bert_utils import get_lm_embeddings
 
 class BertClsTrainedSimMapper(BaseMapper):
@@ -36,13 +36,10 @@ class BertClsTrainedSimMapper(BaseMapper):
         train_df = self.get_dataset(self.test_dataset, split="train")
         valid_df = self.get_dataset(self.test_dataset, split="val")
 
-        # Change this datatype into a df which contains pieces of text paired by class
-        train_df = pair_class_df(train_df, class_column="label")
-        valid_df = pair_class_df(valid_df, class_column="label")
-
-        # Then randomly unpair half of the class-paired texts as the out-of-class examples for training
-        train_df = shuffle_paired_df(train_df)
-        valid_df = shuffle_paired_df(valid_df)
+        # Get df where a given text observation is eitehr paired with another observation of their class, or an observation of another class.
+        # This difference is the label (1/0) and is what the similarity model is trying to predict
+        train_df = get_cls_pair_matched_df(train_df, class_column="label")
+        valid_df = get_cls_pair_matched_df(valid_df, class_column="label")
 
         params = {
             "lr": 5e-5,
