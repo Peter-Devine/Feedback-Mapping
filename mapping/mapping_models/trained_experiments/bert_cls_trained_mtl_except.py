@@ -24,7 +24,7 @@ class BertClsTrainedMtlExceptMapper(BaseMapper):
         self.batch_size = 64
 
     def get_model(self):
-        model_path = os.path.join(self.model_dir, f"all.pt")
+        model_path = os.path.join(self.model_dir, f"all_except_{self.test_dataset}.pt")
 
         model = self.read_or_create_model(model_path)
 
