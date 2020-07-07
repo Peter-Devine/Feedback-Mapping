@@ -35,6 +35,7 @@ def get_single_dataset(dataset):
 
     dataset_download_dir = os.path.join(DOWNLOAD_DIR, dataset)
     if not os.path.exists(dataset_download_dir):
+        assert dataset in DOWNLOADER_DICT.keys(), f"{dataset} is not supported. Please create a folder with the path {dataset_download_dir} and add your own train.csv, val.csv and test.csv files with 'text' and 'label' columns to use your own data."
         downloader = DOWNLOADER_DICT[dataset](random_state = get_random_seed(), download_dir = dataset_download_dir)
         print(f"Downloading {dataset}")
         downloader.download()
