@@ -49,6 +49,9 @@ class Maalej2016(DownloadUtilBase):
         df["title"] = df.title.fillna("")
         df["text"] = df.title + df.title.apply(lambda x: "" if len(x)<1 else ". ") + df.comment
 
+        # We drop title and comments as they can have bad characters which mess up the csv file
+        df = df.drop(["title", "comment"], axis=1)
+
         train_and_val = df.sample(frac=0.7, random_state=self.random_state)
         train = train_and_val.sample(frac=0.7, random_state=self.random_state)
         val = train_and_val.drop(train.index)
