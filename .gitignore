@@ -1,6 +1,9 @@
 __pycache__/
+data/auxiliary/
 data/embeddings/
+data/preprocessed/
 data/raw/
+results/compositions/
 results/examples/
 results/scores/
 results/visualisations/
