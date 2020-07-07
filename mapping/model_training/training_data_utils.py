@@ -1,14 +1,63 @@
 import re
+import math
 import pandas as pd
+from transformers import AutoTokenizer
+from nltk.util import ngrams
 from utils.utils import get_random_seed
 
-def get_jaccard_n_gram_sim_df(df, n_gram):
-    first_texts, second_texts = get_shuffled_second_text(df.text)
+def get_n_gram_sim_df(texts, n_gram_level, model_name, sim_type):
+    # First, pair each text observation with a random other text observation
+    first_texts, second_texts = get_shuffled_second_text(texts)
 
-def get_shuffled_second_text(first_text):
+    # prepare the tokenizer
+    tok = AutoTokenizer.from_pretrained("bert-base-uncased")
+
+    # Next, get the n-grams of each observation
+    def get_series_n_grams(text_series):
+        tokens = [tok.tokenize(x) for x in text_series]
+        n_grams = [set(ngrams(x, n_gram_level)) for x in tokens]
+        return n_grams
+
+    first_n_grams = get_series_n_grams(first_texts)
+    second_n_grams = get_series_n_grams(second_texts)
+
+    # Finally, select a similarity scorer and apply it to each pair of n-grams
+    SIM_SCORE_DICT = {
+        "overlap": get_overlap_coefficient,
+        "jaccard": get_jaccard_index,
+        "ochiai": get_ochiai_coefficient,
+        "dice": get_dice_score,
+    }
+    assert sim_type in SIM_SCORE_DICT.keys(), f"Invalid similarity score type {sim_type}. Please choose one of {SIM_SCORE_DICT.keys()}."
+    sim_score = SIM_SCORE_DICT[sim_type]
+
+    text_sim_scores = [sim_score(ngm1, ngm2) if len(ngm1) > 0 and len(ngm2) > 0 else 0 for ngm1, ngm2 in zip(first_n_grams, second_n_grams)]
+
+    sim_df = pd.DataFrame({"first_text": first_texts, "second_text": second_texts, "score": text_sim_scores})
+
+    return sim_df
+
+# Get the overlap coefficient (https://en.wikipedia.org/wiki/Overlap_coefficient) of two given sets
+def get_overlap_coefficient(set1, set2):
+    return float(len(set1 & set2)) / min(len(set1), len(set2))
+
+# Get the Jaccard index (https://en.wikipedia.org/wiki/Jaccard_index) of two given sets
+def get_jaccard_index(set1, set2):
+    return float(len(set1 & set2)) / float(len(set1 | set2))
+
+# Get the Ochiai coefficient (cos similarity) (https://en.wikipedia.org/wiki/Cosine_similarity#Otsuka-Ochiai_coefficient) of two given sets
+def get_ochiai_coefficient(set1, set2):
+    return float(len(set1 & set2)) / (math.sqrt(float(len(set1))) *
+                                          math.sqrt(float(len(set2))))
+
+# Get the Dice score (https://en.wikipedia.org/wiki/S%C3%B8rensen%E2%80%93Dice_coefficient) of two given sets
+def get_dice_score(set1, set2):
+    return 2.0 * float(len(set1 & set2)) / float(len(set1) + len(set2))
+
+def get_shuffled_second_text(first_texts):
     # Take in a series of text, shuffled it, shifts it by one and then outputs both the shuffled and shifted texts
     # This ensures that we have randomly shuffled pairs of texts that are always paired with a different other text
-    first_texts = first_texts.sample(frac=1)
+    first_texts = first_texts.sample(frac=1, random_state = get_random_seed())
     second_texts = first_texts.shift(1)
     second_texts.iloc[0] = first_texts.iloc[-1]
     return first_texts, second_texts
