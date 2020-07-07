@@ -14,12 +14,12 @@ from mapping.model_training.transformer_training import train_sim
 from mapping.model_training.training_data_utils import get_next_sentence_df
 from utils.bert_utils import get_lm_embeddings
 
-class BertNspTrainedMapper(BaseMapper):
+class BertNspTrainedTestMapper(BaseMapper):
 
     def get_embeds(self):
         test_df = self.get_dataset(self.test_dataset, split="test")
 
-        all_embeddings = get_lm_embeddings(self, test_df, f"{self.test_dataset} train NSP trained")
+        all_embeddings = get_lm_embeddings(self, test_df, f"{self.test_dataset} test NSP trained")
 
         return all_embeddings, test_df.label
 
@@ -36,7 +36,7 @@ class BertNspTrainedMapper(BaseMapper):
         return model
 
     def train_model(self, model_path):
-        train_df = self.get_dataset(self.test_dataset, split="train")
+        train_df = self.get_dataset(self.test_dataset, split="test")
         valid_df = self.get_dataset(self.test_dataset, split="val")
 
         train_df = get_next_sentence_df(train_df)
@@ -58,4 +58,4 @@ class BertNspTrainedMapper(BaseMapper):
         torch.save(model.state_dict(), model_path)
 
     def get_mapping_name(self):
-        return f"bert_nsp_trained"
+        return f"bert_nsp_trained_test"
