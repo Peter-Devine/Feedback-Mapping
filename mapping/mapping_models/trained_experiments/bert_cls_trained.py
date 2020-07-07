@@ -19,7 +19,7 @@ class BertClsTrainedMapper(BaseMapper):
         return all_embeddings, test_df.label
 
     def set_parameters(self):
-        self.model_name = 'binwang/bert-base-nli'
+        self.model_name = 'bert-base-uncased'
         self.max_length = 128
         self.batch_size = 64
 
