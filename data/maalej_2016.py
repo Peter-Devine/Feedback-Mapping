@@ -35,12 +35,21 @@ class Maalej2016(DownloadUtilBase):
 
         shutil.rmtree(task_data_path)
 
-        df = pd.DataFrame(data)
+        df_data = [{"title": datum["title"],
+                    "comment": datum["comment"],
+                    "rating": datum["rating"],
+                    "label": datum["label"],
+                    "reviewer": datum["reviewer"],
+                    "appId": datum["appId"],
+                    "dataSource": datum["dataSource"],
+                    "date": datum["date"]} for datum in data]
+
+        df = pd.DataFrame(df_data)
 
         df["title"] = df.title.fillna("")
         df["text"] = df.title + df.title.apply(lambda x: "" if len(x)<1 else ". ") + df.comment
 
-        train_and_val = df.sample(frac=0.8, random_state=self.random_state)
+        train_and_val = df.sample(frac=0.7, random_state=self.random_state)
         train = train_and_val.sample(frac=0.7, random_state=self.random_state)
         val = train_and_val.drop(train.index)
         test = df.drop(train_and_val.index)
