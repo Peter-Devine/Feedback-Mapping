@@ -107,13 +107,14 @@ def get_next_sentence_df(df):
     matched_df = get_two_text_df(all_split_df)
 
     # Maybe comment this line out, might make training better, as we will have more examples of splits
+    # Comment in if you want to have multiple instances of the same observation, just at different splits
     # matched_df = matched_df.groupby('id', group_keys=False).apply(lambda df: df.sample(1, random_state = get_random_seed()))
 
     # Randomly split the dataset into two
     first_split_df, second_split_df = randomly_split_df(matched_df)
 
-    # Again, maybe comment below out to allow the same sentence to be matched and unmatched
-    full_df = shuffle_paired_df(matched_df)
+    # Get both sides of the split, and randomly shuffle one of them so that they are no longer paired with paired text
+    full_df = shuffle_paired_df(first_split_df, second_split_df)
 
     return full_df
 
