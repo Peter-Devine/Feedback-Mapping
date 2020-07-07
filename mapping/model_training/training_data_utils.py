@@ -110,7 +110,7 @@ def get_next_sentence_df(df):
     # matched_df = matched_df.groupby('id', group_keys=False).apply(lambda df: df.sample(1, random_state = get_random_seed()))
 
     # Randomly split the dataset into two
-    first_split_df, second_split_df = randomly_split_df(paired_df)
+    first_split_df, second_split_df = randomly_split_df(matched_df)
 
     # Again, maybe comment below out to allow the same sentence to be matched and unmatched
     full_df = shuffle_paired_df(matched_df)
