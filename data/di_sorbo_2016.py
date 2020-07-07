@@ -35,7 +35,7 @@ class DiSorbo2016(DownloadUtilBase):
             if df is None:
                 df = full_review_df
             else:
-                df = df.append(full_review_df)
+                df = df.append(full_review_df).reset_index(drop=True)
 
             return df
 
