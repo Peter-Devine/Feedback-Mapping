@@ -6,7 +6,7 @@ from tqdm import tqdm
 import torch
 from transformers import AutoModel
 from mapping.mapping_models.mapping_models_base import BaseMapper
-from mapping.model_training.transformer_training import train_sim
+from mapping.model_training.transformer_training import train_cls
 from mapping.model_training.training_data_utils import get_cls_pair_matched_df
 from utils.bert_utils import get_lm_embeddings
 
@@ -49,7 +49,7 @@ class BertClsTrainedSimMapper(BaseMapper):
             "patience": 2
         }
 
-        model = train_sim(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device, params)
+        model = train_cls(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device, params, training_type="sim_cls")
 
         torch.save(model.state_dict(), model_path)
 

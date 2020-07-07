@@ -10,7 +10,13 @@ from tqdm import tqdm
 from mapping.model_training.transformer_models import get_cls_model_and_optimizer, get_nsp_model_and_optimizer
 from mapping.model_training.transformer_eval import create_eval_engine
 
-def train_cls(train_df, val_df, model_name, batch_size, max_len, device, params):
+def train_cls(train_df, val_df, model_name, batch_size, max_len, device, params, training_type="cls"):
+    # Three training types are allowed:
+    # Classification - taking one piece of text and classifying it given a set of labels
+    # Similarity classification - given two pieces of text, classifying whether they are similar or not, in a binary fashion (E.g. next sentence prediction, duplicate issues etc.)
+    # Similarity regression - given two pieces of text, calculating the overlap of those texts
+    allowed_training_types = ["cls", "sim_cls", "sim_reg"]
+    assert training_type in allowed_training_types, f"Cannot train using {training_type}. Currently only {allowed_training_types} are supported."
 
     # Load pre-trained model tokenizer (vocabulary)
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
@@ -20,82 +26,85 @@ def train_cls(train_df, val_df, model_name, batch_size, max_len, device, params)
     model = model.to(device)
     model.zero_grad()
 
-    # Tokenize and convert to input IDs
-    X_train = get_inputs(train_df.text, tokenizer, max_len)
-    X_val = get_inputs(val_df.text, tokenizer, max_len)
-
-    # Get labels for each observation
-    y_train, label_dict = get_labels(train_df)
-    y_val, _ = get_labels(val_df, label_dict=label_dict)
-
-    # Batch tensor so we can iterate over inputs
-    train_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_train, y_train), batch_size=batch_size, shuffle=True)
-    val_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_val, y_val), batch_size=batch_size, shuffle=False)
-
-    n_classes = len(train_df.label.unique())
+    # Get the hyperparameters for training
     lr = params["lr"]
     eps = params["eps"]
     wd = params["wd"]
-    training_model, optimizer = get_cls_model_and_optimizer(model, n_classes, lr, eps, wd, device)
-
-    loss_fn = torch.nn.CrossEntropyLoss()
-
     epochs = params["epochs"]
     patience = params["patience"]
-    model = train_on_dataset(training_model, train_loader, val_loader, optimizer, loss_fn, n_classes, epochs, patience, device)
+
+    # Get the dataloader for both training and test sets
+    # This dataloader holds the inputs and outputs of each observation, and batches them
+    if training_type == "cls":
+        train_loader, label_dict = get_cls_dataloader(train_df, tokenizer, max_len, batch_size, is_train=True, label_dict=None)
+        val_loader, _ = get_cls_dataloader(val_df, tokenizer, max_len, batch_size, is_train=False, label_dict=label_dict)
+        n_classes = len(label_dict.keys())
+    elif training_type == "sim_cls":
+        train_loader = get_sim_cls_dataloader(train_df, tokenizer, max_len, batch_size, is_train=True)
+        val_loader = get_sim_cls_dataloader(val_df, tokenizer, max_len, batch_size, is_train=False)
+        n_classes = 2
+    elif training_type == "sim_reg":
+        n_classes = 1
+        pass
+    else:
+        raise Exception(f"Cannot train using {training_type}. Currently only {allowed_training_types} are supported.")
+
+    # Prepare the model and optimizer
+    if training_type == "cls":
+        training_model, optimizer = get_cls_model_and_optimizer(model, n_classes, lr, eps, wd, device)
+    elif training_type == "sim_cls":
+        training_model, optimizer = get_nsp_model_and_optimizer(model, lr, eps, wd, device)
+    elif training_type == "sim_reg":
+        pass
+
+    # Prepare the loss function
+    if training_type == "sim_reg":
+        pass
+    else:
+        loss_fn = torch.nn.CrossEntropyLoss()
+        target_metric = "average f1"
+        eval_engine = create_eval_engine(model, n_classes, device)
+
+    model = train_on_dataset(training_model, train_loader, val_loader, optimizer, loss_fn, n_classes, epochs, patience, device, target_metric, eval_engine)
 
     return model
 
-def train_sim(train_df, val_df, model_name, batch_size, max_len, device, params):
-
-    # Load pre-trained model tokenizer (vocabulary)
-    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
-
-    # Load the BERT model
-    model = AutoModel.from_pretrained(model_name)
-    model = model.to(device)
-    model.zero_grad()
+def get_cls_dataloader(df, tokenizer, max_len, batch_size, is_train, label_dict=None):
+    # Creates a dataloader for all classification datasets
 
     # Tokenize and convert to input IDs
-    X_train_first = get_inputs(train_df.first_text, tokenizer, max_len)
-    X_train_second = get_inputs(train_df.second_text, tokenizer, max_len)
-    X_val_first = get_inputs(val_df.first_text, tokenizer, max_len)
-    X_val_second = get_inputs(val_df.second_text, tokenizer, max_len)
+    X = get_inputs(df.text, tokenizer, max_len)
+    # Get labels for each observation
+    y, label_dict = get_labels(df.label, label_dict=label_dict)
+
+    data_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X, y), batch_size=batch_size, shuffle=is_train)
+
+    return data_loader, label_dict
+
+def get_sim_cls_dataloader(df, tokenizer, max_len, batch_size, is_train):
+    # Creates a dataloader for all similarity classification (similar/not similar binary classification) datasets
+
+    # Tokenize and convert to input IDs
+    X_first = get_inputs(df.first_text, tokenizer, max_len)
+    X_second = get_inputs(df.second_text, tokenizer, max_len)
 
     # Get labels for each observation
-    y_train = torch.LongTensor(np.stack(train_df.label.values))
-    y_val = torch.LongTensor(np.stack(val_df.label.values))
+    y = torch.LongTensor(np.stack(df.label.values))
 
-    # Batch tensor so we can iterate over inputs
-    train_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_train_first, X_train_second, y_train), batch_size=batch_size, shuffle=True)
-    val_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_val_first, X_val_second, y_val), batch_size=batch_size, shuffle=False)
+    data_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_first, X_second, y), batch_size=batch_size, shuffle=is_train)
 
-    lr = params["lr"]
-    eps = params["eps"]
-    wd = params["wd"]
-    training_model, optimizer = get_nsp_model_and_optimizer(model, lr, eps, wd, device)
-
-    loss_fn = torch.nn.CrossEntropyLoss()
-
-    epochs = params["epochs"]
-    patience = params["patience"]
-    n_classes = 2
-    model = train_on_dataset(training_model, train_loader, val_loader, optimizer, loss_fn, n_classes, epochs, patience, device)
-
-    return model
+    return data_loader
 
 def get_inputs(text_series, tokenizer, max_len):
     return tokenizer.batch_encode_plus(list(text_series.values), max_length = max_len, pad_to_max_length=True, truncation=True, return_tensors="pt")["input_ids"]
 
-def get_labels(df, label_dict = None):
+def get_labels(labels, label_dict=None):
     if label_dict is None:
-        label_dict = {label: i for i, label in enumerate(df.label.unique())}
-    int_labels = df.label.apply(lambda x: label_dict[x])
+        label_dict = {label: i for i, label in enumerate(labels.unique())}
+    int_labels = labels.apply(lambda x: label_dict[x])
     return torch.LongTensor(np.stack(int_labels.values)), label_dict
 
-def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patience, device):
-
-    TARGET_METRIC = "average f1"
+def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patience, device, target_metric, eval_engine):
 
     eval_engine = create_eval_engine(model, n_classes, device)
 
@@ -103,7 +112,6 @@ def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patie
     best_score = 0
 
     for epoch in tqdm(range(epochs), desc="Epoch"):
-        torch.cuda.empty_cache()
 
         # Train on all batches
         batch_progress = tqdm(train, desc="Batch")
@@ -117,8 +125,8 @@ def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patie
         model = model.train()
 
         # Calculate whether patience has been exceeded or not on the target metric
-        target_score = results[TARGET_METRIC]
-        print(f"{TARGET_METRIC} is {target_score} at epoch {epoch}")
+        target_score = results[target_metric]
+        print(f"{target_metric} is {target_score} at epoch {epoch}")
 
         is_patience_up, epochs_since_last_best, best_score = check_best(model, epochs_since_last_best, target_score, best_score, patience)
 
