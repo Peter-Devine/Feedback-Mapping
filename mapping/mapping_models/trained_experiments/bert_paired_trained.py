@@ -16,6 +16,7 @@ from mapping.mapping_models.mapping_models_base import BaseMapper
 from mapping.model_training.transformer_training import train_cls
 from mapping.model_training.training_data_utils import randomly_split_df, shuffle_paired_df
 from utils.utils import get_random_seed
+from utils.bert_utils import get_lm_embeddings
 
 class BertPairedTrainedMapper(BaseMapper):
 
