@@ -8,6 +8,7 @@ from tqdm import tqdm
 import torch
 from transformers import AutoTokenizer, AutoModel
 from mapping.mapping_models.mapping_models_base import BaseMapper
+from utils.bert_utils import get_lm_embeddings
 
 class BertVanillaMapper(BaseMapper):
 
