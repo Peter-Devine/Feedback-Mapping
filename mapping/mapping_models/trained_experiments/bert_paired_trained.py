@@ -1,15 +1,9 @@
-import math
-
 import pandas as pd
 
 import os
 import requests
-import zipfile
-import io
+import tarfile
 import shutil
-
-import numpy as np
-from tqdm import tqdm
 
 import torch
 from transformers import AutoTokenizer, AutoModel
