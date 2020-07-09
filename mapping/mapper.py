@@ -1,3 +1,4 @@
+from mapping.mapping_models.keyword_matching import KeywordMatchingMapper
 from mapping.mapping_models.use import UseMapper
 from mapping.mapping_models.bert_vanilla import BertVanillaMapper
 from mapping.mapping_models.tfidf_pca import TfidfPcaMapper
@@ -20,6 +21,7 @@ from mapping.mapping_models.trained_experiments.bert_paired_trained import BertP
 from mapping.mapping_models.random import RandomMapper
 
 MAPPER_DICT = {
+    "keyword_matching": KeywordMatchingMapper,
     "use": UseMapper,
     "bert_vanilla": BertVanillaMapper,
     "tfidf_pca": TfidfPcaMapper,
