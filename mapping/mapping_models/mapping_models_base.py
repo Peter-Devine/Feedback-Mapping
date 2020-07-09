@@ -25,8 +25,8 @@ class BaseMapper:
         create_dir(self.preprocessed_dataset_dir)
 
         # Preprocessed dir
-        self.auxiliary_dataset_dir = os.path.join(self.overall_dataset_dir, "auxiliary")
-        create_dir(self.auxiliary_dataset_dir)
+        self.base_auxiliary_dataset_dir = os.path.join(self.overall_dataset_dir, "auxiliary")
+        create_dir(self.base_auxiliary_dataset_dir)
 
         # Get mapping name
         self.mapping_name = self.get_mapping_name()
@@ -39,6 +39,8 @@ class BaseMapper:
         create_dir(self.model_repo_dir)
         self.model_dir = os.path.join(self.model_repo_dir, self.mapping_name)
         create_dir(self.model_dir)
+        self.auxiliary_dataset_dir = os.path.join(self.base_auxiliary_dataset_dir, self.mapping_name)
+        create_dir(self.auxiliary_dataset_dir)
 
     def get_mapping_name(self):
         raise NotImplementedError(f"get_mapping_name not implemented when running on {self.test_dataset} dataset")
