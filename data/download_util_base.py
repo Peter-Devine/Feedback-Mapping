@@ -1,4 +1,5 @@
 import os
+from utils.utils import bad_char_del
 
 class DownloadUtilBase:
     def __init__(self, random_state, download_dir):
@@ -9,8 +10,6 @@ class DownloadUtilBase:
             os.makedirs(self.download_dir)
 
     def download(self, train, val, test):
-        bad_char_del = lambda x: x.replace("\n", " ").replace("\r", " ").replace("\t", " ")
-
         train["text"] = train["text"].apply(bad_char_del)
         val["text"] = val["text"].apply(bad_char_del)
         test["text"] = test["text"].apply(bad_char_del)

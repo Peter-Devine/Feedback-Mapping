@@ -16,3 +16,6 @@ def get_random_seed():
 
 def set_random_seed(seed_value):
     os.environ[seed_env_var_name] = str(seed_value)
+
+def bad_char_del(text):
+     return text.replace("\n", " ").replace("\r", " ").replace("\t", " ")

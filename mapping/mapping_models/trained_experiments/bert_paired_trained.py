@@ -6,6 +6,7 @@ import os
 import requests
 import zipfile
 import io
+import shutil
 
 import numpy as np
 from tqdm import tqdm
@@ -15,7 +16,7 @@ from transformers import AutoTokenizer, AutoModel
 from mapping.mapping_models.mapping_models_base import BaseMapper
 from mapping.model_training.transformer_training import train_cls
 from mapping.model_training.training_data_utils import randomly_split_df, shuffle_paired_df
-from utils.utils import get_random_seed
+from utils.utils import get_random_seed, bad_char_del
 from utils.bert_utils import get_lm_embeddings
 
 class BertPairedTrainedMapper(BaseMapper):
@@ -33,27 +34,82 @@ class BertPairedTrainedMapper(BaseMapper):
         self.batch_size = 32
 
     def get_auxiliary_dataset(self):
-        auxiliary_dataset_path = os.path.join(self.auxiliary_dataset_dir, "github_issues.csv")
 
-        if not os.path.exists(auxiliary_dataset_path):
-            r = requests.get("https://storage.googleapis.com/kaggle-data-sets/10116%2F14254%2Fcompressed%2Fgithub_issues.csv.zip?GoogleAccessId=gcp-kaggle-com@kaggle-161607.iam.gserviceaccount.com&Expires=1593838591&Signature=n2Z%2BLOhR1yJq8%2Fe9DeoqpDwYx%2Fd0%2BeLgVADqEHAvLJGARv1rDQeW90ToP8J6IECtbLzGChwg0O18AjUUwbeNM70o3%2Bh32ej5lkl0RR3e89oAOP0IFMyL5JiRRFSrN%2ByobxbpIVLvz2R31qxIgpUp8DcQYDRaMvdIAdUEdXVUZBUqWuadFG08vtmwhWcQtL0gFlUOcsrrC2BCR3wWCiTPoQYouNEc0%2BXa13VTZlKeLW66R%2BZEG%2BOe0uxM%2BhZzZHsA7dA10tw23fBNHdsr5%2FITLLNu2y79QC8rFqrq3VxHIfaLT3aq%2Fyte3rr0TVSwwc43CMH9i35ibeS4N703zNaXjQ%3D%3D")
-            z = zipfile.ZipFile(io.BytesIO(r.content))
-            z.extractall(path = self.auxiliary_dataset_dir)
+        def download_project_data(filename):
+            # Download the paired bug dataset by Irving Muller Rodrigues, Daniel Aloise, Eraldo Rezende Fernandes, and Michel Dagenais (Ref https://github.com/irving-muller/soft_alignment_model_bug_deduplication)
+            url = f"https://zenodo.org/record/3922012/files/{filename}.tar.gz?download=1"
+            target_tar_file_dir = os.path.join(self.auxiliary_dataset_dir, f"{filename}.tar.gz")
+            response = requests.get(url, stream=True)
+            if response.status_code == 200:
+                with open(target_tar_file_dir, 'wb') as f:
+                    f.write(response.raw.read())
+            else:
+                raise Exception(f"Response status code {response.status_code} when trying to download paired dataset from {url}")
 
-        # Read the csv file, rename the columns to standardised names and only take a subset of the data
-        aux_df = pd.read_csv(auxiliary_dataset_path)
-        # We aim to pair titles with bodies for a large number of GitHub issues
-        aux_df = aux_df.rename(columns={"issue_url": "id", "issue_title": "first_text", "body": "second_text"})
-        aux_train_df = aux_df.sample(n=100000, random_state = get_random_seed())
-        aux_val_df = aux_df.sample(n=1000, random_state = get_random_seed())
+            # Unzip downloaded tar file
+            tar = tarfile.open(target_tar_file_dir, "r:gz")
+            tar.extractall()
+            tar.close()
 
-        # Make the data such that we have 50% paired and 50% unpaired
-        first_train_df, second_train_df = randomly_split_df(aux_train_df)
-        first_val_df, second_val_df = randomly_split_df(aux_val_df)
+        def get_aux_paired_text_df(filename, split, del_files=False):
+            # Download data as necessary
+            unzipped_files_dir = os.path.join(self.auxiliary_dataset_dir, f"{filename}")
+            if not os.path.exists(unzipped_files_dir):
+                # N.B. we need to remove the "_article" substring when downloading for eclipse only
+                download_project_data(filename.replace("_article", ""))
 
-        # Then shuffle the second dfs so that they are unpaired
-        paired_train_df = shuffle_paired_df(first_train_df, second_train_df)
-        paired_val_df = shuffle_paired_df(first_val_df, second_val_df)
+            if "eclipse" in filename:
+                small_filename = "eclipse"
+            elif "mozilla" in filename:
+                small_filename = "mozilla"
+            elif "netbeans" in filename:
+                small_filename = "netbeans"
+            elif "open_office" in filename:
+                small_filename = "open_office"
+
+            # Prepare a dataframe with all pair IDs and labels
+            pair_file_dir = os.path.join(unzipped_files_dir, f"{split}_{small_filename}_pairs_random_1.txt")
+            with open(pair_file_dir, 'r') as f:
+                data = f.readlines()
+            split_data = [x.split(",") for x in data]
+            matching_df = pd.DataFrame([{"first_text_id": x[0], "second_text_id": x[1], "label": x[2].strip()} for x in split_data])
+
+            # Prepare a dataframe with all text data
+            text_file_dir = os.path.join(unzipped_files_dir, f"{small_filename}_initial.json")
+            with open(text_file_dir,'r') as f:
+                data = [json.loads(datum) for datum in f.readlines()]
+            text_df = pd.DataFrame(data)
+
+            if del_files:
+                # Delete files now that they have been read and will not be used any more
+                shutil.rmtree(unzipped_files_dir)
+
+            # Merge these two dataframes to have the label, first text and second text on each row
+            first_merged_df = pd.merge(matching_df, text_df, how='inner', left_on="first_text_id", right_on="bug_id")
+            full_merged_df = pd.merge(first_merged_df, text_df, how='inner', left_on="second_text_id", right_on="bug_id", suffixes=("_first", "_second"))
+
+            # The original dataset has labels of 1 and -1, so we fix that to make it 1 and 0
+            full_merged_df["label"] = full_merged_df["label"].apply(lambda x: x if x == 1 else 0)
+
+            paired_df = full_merged_df[["short_desc_first", "short_desc_second", "label"]]
+            paired_df = paired_df.rename(columns = {"short_desc_first": "first_text", "short_desc_second": "second_text"})
+
+            paired_df["first_text"] = paired_df["first_text"].apply(bad_char_del)
+            paired_df["second_text"] = paired_df["second_text"].apply(bad_char_del)
+
+            return paired_df
+
+        ec_train = get_aux_paired_text_df("eclipse_2001-2007_2008_article", "training").sample(n=10000, random_state = get_random_seed())
+        ec_val = get_aux_paired_text_df("eclipse_2001-2007_2008_article", "validation").sample(n=2000, random_state = get_random_seed())
+        mz_train = get_aux_paired_text_df("mozilla_2001-2009_2010", "training").sample(n=10000, random_state = get_random_seed())
+        mz_val = get_aux_paired_text_df("mozilla_2001-2009_2010", "validation").sample(n=2000, random_state = get_random_seed())
+        nb_train = get_aux_paired_text_df("netbeans_2001-2007_2008", "training").sample(n=10000, random_state = get_random_seed())
+        nb_val = get_aux_paired_text_df("netbeans_2001-2007_2008", "validation").sample(n=2000, random_state = get_random_seed())
+        oo_train = get_aux_paired_text_df("open_office_2001-2008_2010", "training").sample(n=10000, random_state = get_random_seed())
+        oo_val = get_aux_paired_text_df("open_office_2001-2008_2010", "validation").sample(n=2000, random_state = get_random_seed())
+
+        paired_train_df = ec_train.append(mz_train).append(nb_train).append(oo_train).reset_index(drop=True)
+        paired_val_df = ec_val.append(mz_val).append(nb_val).append(oo_val).reset_index(drop=True)
 
         return paired_train_df, paired_val_df
 
