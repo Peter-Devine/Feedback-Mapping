@@ -33,16 +33,18 @@ class BertPairedTrainedMapper(BaseMapper):
             # Download the paired bug dataset by Irving Muller Rodrigues, Daniel Aloise, Eraldo Rezende Fernandes, and Michel Dagenais (Ref https://github.com/irving-muller/soft_alignment_model_bug_deduplication)
             url = f"https://zenodo.org/record/3922012/files/{filename}.tar.gz?download=1"
             target_tar_file_dir = os.path.join(self.auxiliary_dataset_dir, f"{filename}.tar.gz")
-            response = requests.get(url, stream=True)
-            if response.status_code == 200:
-                with open(target_tar_file_dir, 'wb') as f:
-                    f.write(response.raw.read())
-            else:
-                raise Exception(f"Response status code {response.status_code} when trying to download paired dataset from {url}")
+
+            if not os.path.exists(target_tar_file_dir):
+                response = requests.get(url, stream=True)
+                if response.status_code == 200:
+                    with open(target_tar_file_dir, 'wb') as f:
+                        f.write(response.raw.read())
+                else:
+                    raise Exception(f"Response status code {response.status_code} when trying to download paired dataset from {url}")
 
             # Unzip downloaded tar file
             tar = tarfile.open(target_tar_file_dir, "r:gz")
-            tar.extractall()
+            tar.extractall(path=self.auxiliary_dataset_dir)
             tar.close()
 
         def get_aux_paired_text_df(filename, split, del_files=False):
