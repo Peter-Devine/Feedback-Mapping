@@ -10,12 +10,14 @@ from tqdm import tqdm
 from mapping.model_training.transformer_models import get_cls_model_and_optimizer, get_nsp_model_and_optimizer
 from mapping.model_training.transformer_eval import create_eval_engine
 
-def train_cls(train_df, val_df, model_name, batch_size, max_len, device, params, training_type="cls"):
+from utils.utils import randomly_shuffle_list
+
+def train_cls(data_dict, model_name, batch_size, max_len, device, params, training_type="cls"):
     # Three training types are allowed:
     # Classification - taking one piece of text and classifying it given a set of labels
     # Similarity classification - given two pieces of text, classifying whether they are similar or not, in a binary fashion (E.g. next sentence prediction, duplicate issues etc.)
     # Similarity regression - given two pieces of text, calculating the overlap of those texts
-    allowed_training_types = ["cls", "sim_cls", "sim_reg"]
+    allowed_training_types = ["cls", "sim_cls"]#, "sim_reg"]
     assert training_type in allowed_training_types, f"Cannot train using {training_type}. Currently only {allowed_training_types} are supported."
 
     # Load pre-trained model tokenizer (vocabulary)
@@ -33,29 +35,38 @@ def train_cls(train_df, val_df, model_name, batch_size, max_len, device, params,
     epochs = params["epochs"]
     patience = params["patience"]
 
-    # Get the dataloader for both training and test sets
-    # This dataloader holds the inputs and outputs of each observation, and batches them
-    if training_type == "cls":
-        train_loader, label_dict = get_cls_dataloader(train_df, tokenizer, max_len, batch_size, is_train=True, label_dict=None)
-        val_loader, _ = get_cls_dataloader(val_df, tokenizer, max_len, batch_size, is_train=False, label_dict=label_dict)
-        n_classes = len(label_dict.keys())
-    elif training_type == "sim_cls":
-        train_loader = get_sim_cls_dataloader(train_df, tokenizer, max_len, batch_size, is_train=True)
-        val_loader = get_sim_cls_dataloader(val_df, tokenizer, max_len, batch_size, is_train=False)
-        n_classes = 2
-    elif training_type == "sim_reg":
-        n_classes = 1
-        pass
-    else:
-        raise Exception(f"Cannot train using {training_type}. Currently only {allowed_training_types} are supported.")
+    tasks_dict = {}
 
-    # Prepare the model and optimizer
-    if training_type == "cls":
-        training_model, optimizer = get_cls_model_and_optimizer(model, n_classes, lr, eps, wd, device)
-    elif training_type == "sim_cls":
-        training_model, optimizer = get_nsp_model_and_optimizer(model, lr, eps, wd, device)
-    elif training_type == "sim_reg":
-        pass
+    for task_name, (train_df, val_df) in data_dict.items():
+        # Get the dataloader for both training and test sets
+        # This dataloader holds the inputs and outputs of each observation, and batches them
+        if training_type == "cls":
+            train_loader, label_dict = get_cls_dataloader(train_df, tokenizer, max_len, batch_size, is_train=True, label_dict=None)
+            val_loader, _ = get_cls_dataloader(val_df, tokenizer, max_len, batch_size, is_train=False, label_dict=label_dict)
+            n_classes = len(label_dict.keys())
+        elif training_type == "sim_cls":
+            train_loader = get_sim_cls_dataloader(train_df, tokenizer, max_len, batch_size, is_train=True)
+            val_loader = get_sim_cls_dataloader(val_df, tokenizer, max_len, batch_size, is_train=False)
+            n_classes = 2
+        elif training_type == "sim_reg":
+            n_classes = 1
+            pass
+        else:
+            raise Exception(f"Cannot train using {training_type}. Currently only {allowed_training_types} are supported.")
+
+        # Prepare the model and optimizer
+        if training_type == "cls":
+            training_model, optimizer = get_cls_model_and_optimizer(model, n_classes, lr, eps, wd, device)
+        elif training_type == "sim_cls":
+            training_model, optimizer = get_nsp_model_and_optimizer(model, lr, eps, wd, device)
+        elif training_type == "sim_reg":
+            pass
+
+        tasks_dict[task_name] = {"train_dataloader": train_loader,
+                            "val_dataloader": val_loader,
+                            "n_classes": n_classes,
+                            "training_model": training_model,
+                            "optimizer": optimizer}
 
     # Prepare the loss function
     if training_type == "sim_reg":
@@ -63,9 +74,9 @@ def train_cls(train_df, val_df, model_name, batch_size, max_len, device, params,
     else:
         loss_fn = torch.nn.CrossEntropyLoss()
         target_metric = "average f1"
-        eval_engine = create_eval_engine(model, n_classes, device)
+        eval_engine = create_eval_engine(model, device)
 
-    model = train_on_dataset(training_model, train_loader, val_loader, optimizer, loss_fn, n_classes, epochs, patience, device, target_metric, eval_engine)
+    model = train_on_datasets(tasks_dict, loss_fn, epochs, patience, device, target_metric, eval_engine)
 
     return model
 
@@ -104,42 +115,63 @@ def get_labels(labels, label_dict=None):
     int_labels = labels.apply(lambda x: label_dict[x])
     return torch.LongTensor(np.stack(int_labels.values)), label_dict
 
-def train_on_dataset(model, train, val, optim, loss_fn, n_classes, epochs, patience, device, target_metric, eval_engine):
-
-    eval_engine = create_eval_engine(model, n_classes, device)
+def train_on_datasets(tasks_dict, loss_fn, epochs, patience, device, target_metric, eval_engine):
 
     epochs_since_last_best = 0
     best_score = 0
 
     for epoch in tqdm(range(epochs), desc="Epoch"):
 
-        # Train on all batches
-        batch_progress = tqdm(train, desc="Batch")
-        for batch in batch_progress:
-            loss = train_on_batch(model, batch, optim, loss_fn, n_classes, device)
-            batch_progress.set_description(f"Batch loss {loss}")
+        # Get a list of all tasks to train on, with one entry per batch that that task has in its training set. Then randomly shuffle these tasks, and train in that order.
+        task_training_list = []
+        training_iters = {}
+        for task_name, task_data in tasks_dict.items():
+            number_of_observations = len(task_data["train_dataloader"])
+            task_training_list.extend([task_name]*number_of_observations)
 
-        # Eval on validation set
-        model = model.eval()
-        results = eval_engine.run(val).metrics
-        model = model.train()
+            # Get an iterable for each task, which we will refresh each epoch. This allows us to jump between tasks, so we dont have to continually iterate over one dataloader
+            training_iters[task_name] = iter(task_data["train_dataloader"])
+        randomly_shuffle_list(task_training_list)
+
+        # Train on all batches
+        tasks_progress = tqdm(task_training_list, desc="Batch")
+        for task_name in tasks_progress:
+            # Get the current batch and relevant data for the current training task
+            batch = next(training_iters[task_name])
+            model = tasks_dict[task_name]["training_model"]
+            optim = tasks_dict[task_name]["optimizer"]
+            n_classes = tasks_dict[task_name]["n_classes"]
+
+            loss = train_on_batch(model, batch, optim, loss_fn, n_classes, device)
+            tasks_progress.set_description(f"Batch loss at {task_name} - {loss}")
+
+        task_results = {}
+        for task_name, task_data in tasks_dict.items():
+            # Eval on validation set
+            model = task_data["training_model"]
+            model = model.eval()
+            results = eval_engine.run(val).metrics
+            task_results[task_name] = results
+            model = model.train()
 
         # Calculate whether patience has been exceeded or not on the target metric
-        target_score = results[target_metric]
+        target_score = sum([results[target_metric] for task_name, results in task_results.items()]) / len(task_results.keys())
         print(f"{target_metric} is {target_score} at epoch {epoch}")
 
-        is_patience_up, epochs_since_last_best, best_score = check_best(model, epochs_since_last_best, target_score, best_score, patience)
+        # Get any model from tasks dict. They all share the same shared language model layer anyway, which is the one we will take.
+        any_model = get_any_model_from_task_dict(tasks_dict)
+        is_patience_up, epochs_since_last_best, best_score = check_best(any_model, epochs_since_last_best, target_score, best_score, patience)
 
         # Calculate whether patience has been exceeded or not
         if is_patience_up:
             print(f"Stopping training at epoch {epoch} with best metric as {best_score}")
             break
 
+    any_model = get_any_model_from_task_dict(tasks_dict)
     # Loading model from temporary storage
-    load_model(model)
+    load_model(any_model)
 
-    return model.lang_model
-
+    return any_model.lang_model
 
 def train_on_batch(model, batch, optim, loss_fn, n_classes, device):
     # Get the Xs and Ys
@@ -177,6 +209,10 @@ def check_best(model, epochs_since_last_best, target_score, best_score, patience
         is_patience_up = False
 
     return is_patience_up, epochs_since_last_best, best_score
+
+def get_any_model_from_task_dict(tasks_dict):
+    first_task = tasks_dict.keys()[0]
+    return tasks_dict[first_task]["training_model"]
 
 def setup_temp_model_repo():
     temp_model_repo_path = os.path.join(".", "mapping", "model_training", "temp_models")

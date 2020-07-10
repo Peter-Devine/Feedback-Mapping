@@ -34,6 +34,8 @@ class BertClsTrainedMapper(BaseMapper):
         train_df = self.get_dataset(self.test_dataset, split="train")
         valid_df = self.get_dataset(self.test_dataset, split="val")
 
+        training_data_dict = {self.test_dataset: (train_df, valid_df)}
+
         params = {
             "lr": 5e-5,
             "eps": 1e-6,
@@ -42,7 +44,7 @@ class BertClsTrainedMapper(BaseMapper):
             "patience": 2
         }
 
-        model = train_cls(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device, params)
+        model = train_cls(training_data_dict, self.model_name, self.batch_size, self.max_length, self.device, params)
 
         torch.save(model.state_dict(), model_path)
 

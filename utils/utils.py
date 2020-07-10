@@ -1,4 +1,5 @@
 import os
+import random
 
 def create_dir(dir):
     if not os.path.exists(dir):
@@ -16,6 +17,10 @@ def get_random_seed():
 
 def set_random_seed(seed_value):
     os.environ[seed_env_var_name] = str(seed_value)
+
+def randomly_shuffle_list(list):
+    random.seed(a=get_random_seed())
+    random.shuffle(list)
 
 def bad_char_del(text):
      return text.replace("\n", " ").replace("\r", " ").replace("\t", " ")

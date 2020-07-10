@@ -37,18 +37,9 @@ class BertClsTrainedMtlExceptMapper(BaseMapper):
         del train_dfs[self.test_dataset]
         del valid_dfs[self.test_dataset]
 
-        def get_concat_next_sentence_df(dfs):
-            concat_df = None
-
-            for dataset_name, dataset_df in dfs.items():
-                if concat_df is None:
-                    concat_df = dataset_df
-                else:
-                    concat_df = concat_df.append(dataset_df)
-            return concat_df
-
-        train_df = get_concat_next_sentence_df(train_dfs)
-        valid_df = get_concat_next_sentence_df(valid_dfs)
+        mtl_datasets = {}
+        for dataset_name in train_dfs.keys():
+            mtl_datasets[dataset_name] = (train_dfs[dataset_name], valid_dfs[dataset_name])
 
         params = {
             "lr": 5e-5,
@@ -58,7 +49,7 @@ class BertClsTrainedMtlExceptMapper(BaseMapper):
             "patience": 2
         }
 
-        model = train_cls(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device, params)
+        model = train_cls(mtl_datasets, self.model_name, self.batch_size, self.max_length, self.device, params)
 
         torch.save(model.state_dict(), model_path)
 

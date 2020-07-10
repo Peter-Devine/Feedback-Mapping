@@ -45,6 +45,8 @@ class BertNspTrainedMapper(BaseMapper):
         self.save_preprocessed_df(train_df, f"{self.test_dataset}_train")
         self.save_preprocessed_df(valid_df, f"{self.test_dataset}_val")
 
+        training_data_dict = {self.test_dataset: (train_df, valid_df)}
+
         params = {
             "lr": 5e-5,
             "eps": 1e-6,
@@ -53,7 +55,7 @@ class BertNspTrainedMapper(BaseMapper):
             "patience": 2
         }
 
-        model = train_cls(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device, params, training_type="sim_cls")
+        model = train_cls(training_data_dict, self.model_name, self.batch_size, self.max_length, self.device, params, training_type="sim_cls")
 
         torch.save(model.state_dict(), model_path)
 

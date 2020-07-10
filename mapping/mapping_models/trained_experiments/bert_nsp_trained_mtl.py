@@ -39,24 +39,14 @@ class BertNspTrainedMtlMapper(BaseMapper):
         train_dfs = self.get_all_datasets(split="train")
         valid_dfs = self.get_all_datasets(split="val")
 
-        def get_concat_next_sentence_df(dfs):
-            concat_df = None
+        mtl_datasets = {}
+        for dataset_name in train_dfs.keys():
+            train_df = get_next_sentence_df(train_dfs[dataset_name])
+            valid_df = get_next_sentence_df(valid_dfs[dataset_name])
 
-            for dataset_name, dataset_df in dfs.items():
-                two_sent_df = get_next_sentence_df(dataset_df)
-
-                if concat_df is None:
-                    concat_df = two_sent_df
-                else:
-                    concat_df = concat_df.append(two_sent_df)
-
-            return concat_df
-
-        train_df = get_concat_next_sentence_df(train_dfs)
-        valid_df = get_concat_next_sentence_df(valid_dfs)
-
-        self.save_preprocessed_df(train_df, f"train")
-        self.save_preprocessed_df(valid_df, f"val")
+            mtl_datasets[dataset_name] = (train_df, valid_df)
+            self.save_preprocessed_df(train_df, f"{dataset_name}_train")
+            self.save_preprocessed_df(valid_df, f"{dataset_name}_val")
 
         params = {
             "lr": 5e-5,
@@ -66,7 +56,7 @@ class BertNspTrainedMtlMapper(BaseMapper):
             "patience": 2
         }
 
-        model = train_cls(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device, params, training_type="sim_cls")
+        model = train_cls(mtl_datasets, self.model_name, self.batch_size, self.max_length, self.device, params, training_type="sim_cls")
 
         torch.save(model.state_dict(), model_path)
 

@@ -3,7 +3,7 @@ from ignite.metrics import Accuracy, Recall, Precision, ConfusionMatrix
 from ignite.metrics import MetricsLambda
 import torch
 
-def create_eval_engine(model, n_classes, device):
+def create_eval_engine(model, device):
 
     process_function = get_process_function(model, device)
 
@@ -15,8 +15,6 @@ def create_eval_engine(model, n_classes, device):
     recall.attach(eval_engine, "recall")
     precision = Precision(average=False)
     precision.attach(eval_engine, "precision")
-    confusion_matrix = ConfusionMatrix(num_classes=n_classes)
-    confusion_matrix.attach(eval_engine, "confusion_matrix")
     f1 = (precision * recall * 2 / (precision + recall))
     f1.attach(eval_engine, "f1")
     f2 = (precision * recall * 5 / ((4*precision) + recall))

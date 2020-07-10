@@ -41,6 +41,8 @@ class BertClsTrainedSimMapper(BaseMapper):
         train_df = get_cls_pair_matched_df(train_df, class_column="label")
         valid_df = get_cls_pair_matched_df(valid_df, class_column="label")
 
+        training_data_dict = {self.test_dataset: (train_df, valid_df)}
+
         params = {
             "lr": 5e-5,
             "eps": 1e-6,
@@ -49,7 +51,7 @@ class BertClsTrainedSimMapper(BaseMapper):
             "patience": 2
         }
 
-        model = train_cls(train_df, valid_df, self.model_name, self.batch_size, self.max_length, self.device, params, training_type="sim_cls")
+        model = train_cls(training_data_dict, self.model_name, self.batch_size, self.max_length, self.device, params, training_type="sim_cls")
 
         torch.save(model.state_dict(), model_path)
 
