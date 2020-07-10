@@ -129,13 +129,19 @@ def shuffle_paired_df(matched_df, unmatched_df):
 
     return full_df
 
-def get_splits(row):
+def get_splits(row, is_one_sentence=False):
+    # Find splits by newline OR word,punctuation,space for normal datasets or word,space for pre-sentenced datasets
+    if is_one_sentence:
+        search_regex = "[\n]|([\w][\s])"
+    else:
+        search_regex = "[\n]|([\w][!?.][\s])"
 
-    all_possible_splits_idx = re.finditer("[\n]|([\w][!?.][\s])", row)
+    # Find all possible splits in the given text
+    all_possible_splits_idx = re.finditer(search_regex, row)
 
     possible_splits = []
 
-    for i, split in enumerate(all_possible_splits_idx):
+    for split in all_possible_splits_idx:
         split_idx = split.end()
         presplit = row[:split_idx-1]
         postsplit = row[split_idx:]
@@ -144,6 +150,20 @@ def get_splits(row):
 
         if len(presplit.split()) >= MIN_WORDS and len(postsplit.split()) >= MIN_WORDS:
             possible_splits.append((presplit, postsplit))
+
+    num_good_splits = len(possible_splits)
+
+    if num_good_splits == 0 and not is_one_sentence:
+        return get_splits(row, is_one_sentence=True)
+
+    if is_one_sentence:
+        # If there are no good splits even at a sentence level, then return an empty list
+        if num_good_splits < 1:
+            return []
+
+        # Only return one mid-sentence split for each piece of text if it is just one sentence
+        mid_sentence_split = possible_splits[int(num_good_splits/2)]
+        return [mid_sentence_split]
 
     return possible_splits
 
