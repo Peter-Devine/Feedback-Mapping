@@ -17,6 +17,7 @@ class Guzman2015(DownloadUtilBase):
             8: "Noise"
         }
         df["label"] = df.label.apply(lambda x: int_to_str_label_map[x])
+        df["sublabel"] = df["app"]
 
         int_to_app_name_map = {
             6: "Picsart",

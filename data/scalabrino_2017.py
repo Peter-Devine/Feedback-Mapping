@@ -7,6 +7,7 @@ class Scalabrino2017(DownloadUtilBase):
         df = pd.read_csv("https://dibt.unimol.it/reports/clap/downloads/rq3-manually-classified-implemented-reviews.csv")
 
         df = df.rename(columns = {"body": "text", "category": "label"})
+        df["sublabel"] = df["App-name"]
 
         # We take out a randomly sampled one of every label to make sure that the training dataset has one label for each class
         unique_df = df.groupby('label',as_index = False,group_keys=False).apply(lambda s: s.sample(1, random_state=self.random_state))

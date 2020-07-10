@@ -23,14 +23,14 @@ class DiSorbo2016(DownloadUtilBase):
 
         file_dir = os.path.join(task_data_path, "panichella-SURF-29332ec", "SURF_replication_package", "Experiment I", "summaries")
 
-        def add_data_to_df(data, df):
+        def add_data_to_df(data, df, app_name):
             soup = BeautifulSoup(data, 'html.parser')
 
             label_upper_element = [x for x in soup.find_all("sup")]
             text_list = [x.findNext('a').text for x in label_upper_element]
             label_list = [x.find('b').text for x in label_upper_element]
 
-            full_review_df = pd.DataFrame({"text": text_list, "label": label_list})
+            full_review_df = pd.DataFrame({"text": text_list, "label": label_list, "sublabel": app_name})
 
             if df is None:
                 df = full_review_df
@@ -44,7 +44,7 @@ class DiSorbo2016(DownloadUtilBase):
         for file_name in os.listdir(file_dir):
             with open(os.path.join(file_dir, file_name), "rb") as f:
                 data = f.read()
-                all_review_df = add_data_to_df(data, all_review_df)
+                all_review_df = add_data_to_df(data, all_review_df, file_name)
 
         shutil.rmtree(task_data_path)
 

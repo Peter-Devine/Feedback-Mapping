@@ -58,6 +58,8 @@ class Williams2017(DownloadUtilBase):
             "date_posted": date_posted
         })
 
+        df["sublabel"] = df["n_favorites"]
+
         shutil.rmtree(task_data_path)
 
         train_and_val = df.sample(frac=0.7, random_state=self.random_state)
