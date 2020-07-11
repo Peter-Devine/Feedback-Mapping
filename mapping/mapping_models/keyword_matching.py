@@ -8,7 +8,7 @@ class KeywordMatchingMapper(BaseMapper):
 
         keywords = ["bug", "crash", "feature", "app", "great", "new", "freeze"]
         def keyword_embedder(text):
-            return np.ndarray([1 if keyword in text.lower() else 0 for keyword in keywords])
+            return np.array([1 if keyword in text.lower() else 0 for keyword in keywords])
 
         all_embeddings = test_df.text.apply(keyword_embedder).values
 
