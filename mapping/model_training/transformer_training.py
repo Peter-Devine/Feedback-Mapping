@@ -62,11 +62,14 @@ def train_cls(data_dict, model_name, batch_size, max_len, device, params, traini
         elif training_type == "sim_reg":
             pass
 
+        eval_engine = create_eval_engine(training_model, device)
+
         tasks_dict[task_name] = {"train_dataloader": train_loader,
                             "val_dataloader": val_loader,
                             "n_classes": n_classes,
                             "training_model": training_model,
-                            "optimizer": optimizer}
+                            "optimizer": optimizer,
+                            "eval_engine": eval_engine}
 
     # Prepare the loss function
     if training_type == "sim_reg":
@@ -74,9 +77,8 @@ def train_cls(data_dict, model_name, batch_size, max_len, device, params, traini
     else:
         loss_fn = torch.nn.CrossEntropyLoss()
         target_metric = "average f1"
-        eval_engine = create_eval_engine(model, device)
 
-    model = train_on_datasets(tasks_dict, loss_fn, epochs, patience, device, target_metric, eval_engine)
+    model = train_on_datasets(tasks_dict, loss_fn, epochs, patience, device, target_metric)
 
     return model
 
@@ -115,7 +117,7 @@ def get_labels(labels, label_dict=None):
     int_labels = labels.apply(lambda x: label_dict[x])
     return torch.LongTensor(np.stack(int_labels.values)), label_dict
 
-def train_on_datasets(tasks_dict, loss_fn, epochs, patience, device, target_metric, eval_engine):
+def train_on_datasets(tasks_dict, loss_fn, epochs, patience, device, target_metric):
 
     epochs_since_last_best = 0
     best_score = 0
@@ -150,7 +152,11 @@ def train_on_datasets(tasks_dict, loss_fn, epochs, patience, device, target_metr
             # Eval on validation set
             model = task_data["training_model"]
             model = model.eval()
-            results = eval_engine.run(val).metrics
+
+            eval_engine = task_data["eval_engine"]
+            val_dataloader = task_data["val_dataloader"]
+
+            results = eval_engine.run(val_dataloader).metrics
             task_results[task_name] = results
             model = model.train()
 
