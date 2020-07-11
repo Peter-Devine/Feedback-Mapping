@@ -217,7 +217,7 @@ def check_best(model, epochs_since_last_best, target_score, best_score, patience
     return is_patience_up, epochs_since_last_best, best_score
 
 def get_any_model_from_task_dict(tasks_dict):
-    first_task = tasks_dict.keys()[0]
+    first_task = list(tasks_dict.keys())[0]
     return tasks_dict[first_task]["training_model"]
 
 def setup_temp_model_repo():
