@@ -37,11 +37,16 @@ def collate_scores():
 
     collated_df.loc[:, collated_df.max().sort_values(ascending=True).index].boxplot(figsize=(11,6))
 
+    indices = collated_df.max().sort_values(ascending=True).index
+    ax = collated_df.loc[:, indices].boxplot(figsize=(16,9))
+    ax.set_xticklabels([i.replace("_", "\n") for i in indices])
+
     plt.savefig(os.path.join(scores_path, "collated_boxplot.png"))
 
     plt.close()
 
-    collated_df.plot.bar(rot=0, figsize=(11,6))
+    ax = collated_df.plot.bar(figsize=(16,9))
+    ax.set_xticklabels([i.replace("_", "\n") for i in collated_df.index])
 
     plt.savefig(os.path.join(scores_path, "collated_barchart.png"))
 
