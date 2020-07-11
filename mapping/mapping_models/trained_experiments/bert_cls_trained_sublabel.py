@@ -53,4 +53,4 @@ class BertClsTrainedSublabelMapper(BaseMapper):
         torch.save(model.state_dict(), model_path)
 
     def get_mapping_name(self):
-        return f"bert_cls_trained"
+        return f"bert_cls_trained_sublabel"
