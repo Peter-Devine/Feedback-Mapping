@@ -21,7 +21,7 @@ class Chen2014(DownloadUtilBase):
 
         def get_splits_per_app(app_name):
             def df_getter(data_path, label):
-                with open(data_path, "r") as f:
+                with open(data_path, "r", encoding="iso-8859-1") as f:
                     data = f.read()
                 return pd.DataFrame({"text": [" ".join(x.split()[2:]) for x in data.split("\n") if len(x) > 0],
                                      "label": label,
