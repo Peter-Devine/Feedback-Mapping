@@ -58,7 +58,7 @@ class Williams2017(DownloadUtilBase):
             "date_posted": date_posted
         })
 
-        df["sublabel"] = df["n_favorites"]
+        df["sublabel"] = df["timezone"]
 
         shutil.rmtree(task_data_path)
 

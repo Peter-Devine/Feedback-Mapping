@@ -83,7 +83,7 @@ class Tizard2019(DownloadUtilBase):
         df.label = df.label.apply(forum_label_transformer)
 
         df = df.rename(columns={'sentence': 'text'})
-        df["sublabel"] = df["topic_forum"]
+        df["sublabel"] = df["topic_forum"].str.lower()
 
         shutil.rmtree(task_data_path)
 

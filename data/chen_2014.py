@@ -33,8 +33,6 @@ class Chen2014(DownloadUtilBase):
             test_info = df_getter(os.path.join(task_data_path, "datasets", app_name, "test", "info.txt"), "informative")
             test_noninfo = df_getter(os.path.join(task_data_path, "datasets", app_name, "test", "non-info.txt"), "non-informative")
 
-            shutil.rmtree(task_data_path)
-
             train_and_val = train_info.append(train_noninfo).reset_index(drop=True)
             test = test_info.append(test_noninfo).reset_index(drop=True)
 
@@ -44,7 +42,7 @@ class Chen2014(DownloadUtilBase):
             if original_df is None:
                 return new_df
             else:
-                return original_df.append(new_df)
+                return original_df.append(new_df).reset_index(drop=True)
 
         all_train_val = None
         all_test = None
@@ -52,6 +50,8 @@ class Chen2014(DownloadUtilBase):
             app_train_and_val, app_test = get_splits_per_app(app_name)
             all_train_val = append_df(all_train_val, app_train_and_val)
             all_test = append_df(all_test, app_test)
+
+        shutil.rmtree(task_data_path)
 
         train = all_train_val.sample(frac=0.7, random_state=self.random_state)
         val = all_train_val.drop(train.index)
