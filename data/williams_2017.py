@@ -59,6 +59,9 @@ class Williams2017(DownloadUtilBase):
         })
 
         df["sublabel"] = df["timezone"]
+        sublabel_vc = df["sublabel"].value_counts()
+        sublabel_high_vc = sublabel_vc[sublabel_vc > 10]
+        df["sublabel"] = df["sublabel"].apply(lambda x: x if x in sublabel_high_vc else "OTHER")
 
         shutil.rmtree(task_data_path)
 

@@ -41,6 +41,9 @@ class BertClsTrainedSublabelMapper(BaseMapper):
         # Make sure that valid does not have labels that were not included in train
         valid_df = valid_df[valid_df.label.apply(lambda x: x in train_df.label.unique())]
 
+        self.save_preprocessed_df(train_df, f"{self.test_dataset}_train")
+        self.save_preprocessed_df(valid_df, f"{self.test_dataset}_val")
+
         training_data_dict = {self.test_dataset: (train_df, valid_df)}
 
         params = {
