@@ -43,7 +43,7 @@ class SBertWKMapper(BaseMapper):
         test_loader = torch.utils.data.DataLoader(sentences, batch_size=BATCH_SIZE, shuffle=False)
 
         embeddings = []
-        print("Instantiating on SBERT-WK")
+        print("Inferencing on SBERT-WK")
         for sentence_batch in tqdm(test_loader):
             inputs, features_mask = self.get_model_inputs(sentence_batch, tokenizer, params)
 

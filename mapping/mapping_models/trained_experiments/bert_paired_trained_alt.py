@@ -33,7 +33,7 @@ class BertPairedTrainedAltMapper(BaseMapper):
         target_zip_file_dir = os.path.join(self.auxiliary_dataset_dir, f"aux_alt_dataset")
 
         def download_project_data():
-            # Download the paired bug dataset by Irving Muller Rodrigues, Daniel Aloise, Eraldo Rezende Fernandes, and Michel Dagenais (Ref https://github.com/irving-muller/soft_alignment_model_bug_deduplication)
+            # Download the paired bug dataset by https://github.com/whystar/MSR2018-DupPR
             url = f"https://github.com/whystar/MSR2018-DupPR/raw/master/dataset/raw.zip"
 
             if not os.path.exists(target_zip_file_dir):
