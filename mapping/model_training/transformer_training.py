@@ -7,7 +7,7 @@ import os
 
 from tqdm import tqdm
 
-from mapping.model_training.transformer_models import get_cls_model_and_optimizer, get_nsp_model_and_optimizer
+from mapping.model_training.transformer_models import get_cls_model_and_optimizer, get_nsp_model_and_optimizer, get_weighted_adam_optimizer
 from mapping.model_training.transformer_eval import create_eval_engine
 
 from utils.utils import randomly_shuffle_list
