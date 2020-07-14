@@ -43,10 +43,14 @@ def train_t5_generation(train_df, val_df, model_name, batch_size, max_len, devic
 
 def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, patience, device):
 
-    def get_inference_t5(model, input_ids, output_ids, device):
+    def get_inference_t5(model, input_ids, output_ids, device, is_val=False):
         # Put input and output ids into model and get loss from it.
         loss = model(input_ids=input_ids.to(device), lm_labels=output_ids.to(device))[0]
-        return loss
+
+        if is_val:
+            return loss.item()
+        else:
+            return loss
 
     def train_on_batch_t5(model, input_ids, output_ids, optimizer, device):
 
@@ -71,13 +75,14 @@ def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, pati
             loss_val = train_on_batch_t5(model, input_ids, output_ids, optimizer, device)
             batch_progress.set_description(f"Batch loss for T5 training - {loss_val}")
 
-        # Do evaluation at every epoch
-        val_progress = tqdm(val_dataloader, desc="Eval")
-        total_loss = 0
-        for input_ids, output_ids in val_progress:
-            loss_val = get_inference_t5(model, input_ids, output_ids, device).item()
-            total_loss += loss_val
-            val_progress.set_description(f"Validation loss for T5 training - {total_loss}")
+        with torch.no_grad():
+            # Do evaluation at every epoch
+            val_progress = tqdm(val_dataloader, desc="Eval")
+            total_loss = 0
+            for input_ids, output_ids in val_progress:
+                loss_val = get_inference_t5(model, input_ids, output_ids, device, is_val)
+                total_loss += loss_val
+                val_progress.set_description(f"Validation loss for T5 training - {total_loss}")
 
         # Check to see if new loss is less than lowest previous loss (inverse loss as check_best chooses highest score)
         target_score = 1/total_loss
