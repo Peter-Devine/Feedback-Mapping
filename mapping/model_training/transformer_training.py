@@ -37,11 +37,11 @@ def train_t5_generation(train_df, val_df, model_name, batch_size, max_len, devic
     optimizer = get_weighted_adam_optimizer(model, lr=lr, eps=eps, wd=wd)
 
     # Train model
-    enc_model = t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, patience)
+    enc_model = t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, patience, device)
 
     return enc_model
 
-def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, patience):
+def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, patience, device):
 
     epochs_since_last_best = 0
     best_score = -1
@@ -51,7 +51,7 @@ def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, pati
         batch_progress = tqdm(train_dataloader, desc="Batch")
         for input_ids, output_ids in batch_progress:
             # Put input and output ids into model and get loss from it.
-            loss = model(input_ids=input_ids, lm_labels=output_ids)[0]
+            loss = model(input_ids=input_ids.to(device), lm_labels=output_ids.to(device))[0]
 
             #Backpropagate the error through the model
             loss.backward()
@@ -66,7 +66,7 @@ def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, pati
         val_progress = tqdm(val_dataloader, desc="Eval")
         total_loss = 0
         for input_ids, output_ids in val_progress:
-            loss = model(input_ids=input_ids, lm_labels=output_ids)[0]
+            loss = model(input_ids=input_ids.to(device), lm_labels=output_ids.to(device))[0]
             total_loss += loss.item()
             tasks_progress.set_description(f"Validation loss for T5 training - {total_loss}")
 
