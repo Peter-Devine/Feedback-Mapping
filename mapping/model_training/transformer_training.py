@@ -43,6 +43,24 @@ def train_t5_generation(train_df, val_df, model_name, batch_size, max_len, devic
 
 def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, patience, device):
 
+    def get_inference_t5(model, input_ids, output_ids, device):
+        # Put input and output ids into model and get loss from it.
+        loss = model(input_ids=input_ids.to(device), lm_labels=output_ids.to(device))[0]
+        return loss
+
+    def train_on_batch_t5(model, input_ids, output_ids, optimizer, device):
+
+        loss = get_inference_t5(model, input_ids, output_ids, device)
+
+        #Backpropagate the error through the model
+        loss.backward()
+        optimizer.step()
+        # Reset the gradient of the model
+        model.zero_grad()
+        optimizer.zero_grad()
+
+        return loss.item()
+
     epochs_since_last_best = 0
     best_score = -1
     # Cycle through epochs
@@ -50,24 +68,15 @@ def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, pati
         # At each epoch, cycle through batches
         batch_progress = tqdm(train_dataloader, desc="Batch")
         for input_ids, output_ids in batch_progress:
-            # Put input and output ids into model and get loss from it.
-            loss = model(input_ids=input_ids.to(device), lm_labels=output_ids.to(device))[0]
-
-            #Backpropagate the error through the model
-            loss.backward()
-            optimizer.step()
-            # Reset the gradient of the model
-            model.zero_grad()
-            optimizer.zero_grad()
-
-            batch_progress.set_description(f"Batch loss for T5 training - {loss.item()}")
+            loss_val = train_on_batch_t5(model, input_ids, output_ids, optimizer, device)
+            tasks_progress.set_description(f"Batch loss for T5 training - {loss_val}")
 
         # Do evaluation at every epoch
         val_progress = tqdm(val_dataloader, desc="Eval")
         total_loss = 0
         for input_ids, output_ids in val_progress:
-            loss = model(input_ids=input_ids.to(device), lm_labels=output_ids.to(device))[0]
-            total_loss += loss.item()
+            loss_val = get_inference_t5(model, input_ids, output_ids, device).item()
+            total_loss += loss_val
             val_progress.set_description(f"Validation loss for T5 training - {total_loss}")
 
         # Check to see if new loss is less than lowest previous loss (inverse loss as check_best chooses highest score)
