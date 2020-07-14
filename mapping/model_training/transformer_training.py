@@ -69,7 +69,7 @@ def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, pati
         batch_progress = tqdm(train_dataloader, desc="Batch")
         for input_ids, output_ids in batch_progress:
             loss_val = train_on_batch_t5(model, input_ids, output_ids, optimizer, device)
-            tasks_progress.set_description(f"Batch loss for T5 training - {loss_val}")
+            batch_progress.set_description(f"Batch loss for T5 training - {loss_val}")
 
         # Do evaluation at every epoch
         val_progress = tqdm(val_dataloader, desc="Eval")
