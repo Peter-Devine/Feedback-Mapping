@@ -68,7 +68,7 @@ def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, pati
         for input_ids, output_ids in val_progress:
             loss = model(input_ids=input_ids, lm_labels=output_ids)[0]
             total_loss += loss.item()
-            tasks_progress.set_description(f"Batch loss for T5 training - {loss.item()}")
+            tasks_progress.set_description(f"Validation loss for T5 training - {total_loss}")
 
         # Check to see if new loss is less than lowest previous loss (inverse loss as check_best chooses highest score)
         target_score = 1/total_loss
