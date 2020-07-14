@@ -80,7 +80,7 @@ def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, pati
             val_progress = tqdm(val_dataloader, desc="Eval")
             total_loss = 0
             for input_ids, output_ids in val_progress:
-                loss_val = get_inference_t5(model, input_ids, output_ids, device, is_val)
+                loss_val = get_inference_t5(model, input_ids, output_ids, device, is_val=True)
                 total_loss += loss_val
                 val_progress.set_description(f"Validation loss for T5 training - {total_loss}")
 
