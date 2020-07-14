@@ -2,6 +2,23 @@ from transformers import AutoModel,  AdamW
 from torch import nn
 import torch
 
+def get_weighted_adam_optimizer(model, lr, eps, wd):
+    no_decay = ["bias", "LayerNorm.weight"]
+
+    optimizer_grouped_parameters = [
+          {
+                "params": [p for n, p in model.named_parameters() if not any(nd in n for nd in no_decay)],
+                "weight_decay": wd,
+          },
+          {
+                "params": [p for n, p in model.named_parameters() if any(nd in n for nd in no_decay)],
+                "weight_decay": 0.0},
+      ]
+
+    optimizer = AdamW(optimizer_grouped_parameters, lr=lr, eps=eps)
+
+    return optimizer
+
 def get_cls_model_and_optimizer(language_model, n_classes, lr, eps, wd, device):
 
     class ClassificationLanguageModel(nn.Module):
@@ -21,19 +38,7 @@ def get_cls_model_and_optimizer(language_model, n_classes, lr, eps, wd, device):
 
     cls_lm = cls_lm.to(device)
 
-    no_decay = ["bias", "LayerNorm.weight"]
-
-    optimizer_grouped_parameters = [
-          {
-                "params": [p for n, p in cls_lm.named_parameters() if not any(nd in n for nd in no_decay)],
-                "weight_decay": wd,
-          },
-          {
-                "params": [p for n, p in cls_lm.named_parameters() if any(nd in n for nd in no_decay)],
-                "weight_decay": 0.0},
-      ]
-
-    optimizer = AdamW(optimizer_grouped_parameters, lr=lr, eps=eps)
+    optimizer = get_weighted_adam_optimizer(cls_lm, lr=lr, eps=eps, wd=wd)
 
     return cls_lm, optimizer
 
@@ -61,22 +66,10 @@ def get_nsp_model_and_optimizer(language_model, lr, eps, wd, device):
 
           return logits
 
-    cls_lm = NextSentenceLanguageModel(language_model)
+    nsp_lm = NextSentenceLanguageModel(language_model)
 
-    cls_lm = cls_lm.to(device)
+    nsp_lm = nsp_lm.to(device)
 
-    no_decay = ["bias", "LayerNorm.weight"]
+    optimizer = get_weighted_adam_optimizer(nsp_lm, lr=lr, eps=eps, wd=wd)
 
-    optimizer_grouped_parameters = [
-          {
-                "params": [p for n, p in cls_lm.named_parameters() if not any(nd in n for nd in no_decay)],
-                "weight_decay": wd,
-          },
-          {
-                "params": [p for n, p in cls_lm.named_parameters() if any(nd in n for nd in no_decay)],
-                "weight_decay": 0.0},
-      ]
-
-    optimizer = AdamW(optimizer_grouped_parameters, lr=lr, eps=eps)
-
-    return cls_lm, optimizer
+    return nsp_lm, optimizer

@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, AutoModel, T5ForConditionalGeneration
 
 import numpy as np
 
@@ -11,6 +11,76 @@ from mapping.model_training.transformer_models import get_cls_model_and_optimize
 from mapping.model_training.transformer_eval import create_eval_engine
 
 from utils.utils import randomly_shuffle_list
+
+def train_t5_generation(train_df, val_df, model_name, batch_size, max_len, device, params):
+
+    # Load pre-trained model tokenizer (vocabulary)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+
+    # Load the T5 model
+    model = T5ForConditionalGeneration.from_pretrained(model_name)
+    model = model.to(device)
+    model.zero_grad()
+
+    # Get the hyperparameters for training
+    lr = params["lr"]
+    eps = params["eps"]
+    wd = params["wd"]
+    epochs = params["epochs"]
+    patience = params["patience"]
+
+    # Get dataloaders with ids for input and output texts for train and val
+    train_dataloader = get_input_label_text_dataloader(train_df, tokenizer, max_len, batch_size, is_train=True)
+    val_dataloader = get_input_label_text_dataloader(val_df, tokenizer, max_len, batch_size, is_train=False)
+
+    # Get optimizer for learning
+    optimizer = get_weighted_adam_optimizer(model, lr=lr, eps=eps, wd=wd)
+
+    # Train model
+    enc_model = t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, patience)
+
+    return enc_model
+
+def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, patience):
+
+    epochs_since_last_best = 0
+    best_score = 0
+    # Cycle through epochs
+    for epoch in tqdm(range(epochs), desc="Epoch"):
+        # At each epoch, cycle through batches
+        batch_progress = tqdm(train_dataloader, desc="Batch")
+        for input_ids, output_ids in batch_progress:
+            # Put input and output ids into model and get loss from it.
+            loss = model(input_ids=input_ids, lm_labels=output_ids)[0]
+
+            #Backpropagate the error through the model
+            loss.backward()
+            optimizer.step()
+            # Reset the gradient of the model
+            model.zero_grad()
+            optimizer.zero_grad()
+
+            tasks_progress.set_description(f"Batch loss for T5 training - {loss.item()}")
+
+        # Do evaluation at every epoch
+        val_progress = tqdm(val_dataloader, desc="Eval")
+        total_loss = 0
+        for input_ids, output_ids in val_progress:
+            loss = model(input_ids=input_ids, lm_labels=output_ids)[0]
+            total_loss += loss.item()
+            tasks_progress.set_description(f"Batch loss for T5 training - {loss.item()}")
+
+        # Check to see if new loss is less than lowest previous loss (inverse loss as check_best chooses highest score)
+        target_score = 1/total_loss
+        is_patience_up, epochs_since_last_best, best_score = check_best(model, epochs_since_last_best, target_score, best_score, patience)
+
+        if is_patience_up:
+            print(f"Stopping training at epoch {epoch} with best metric as {best_score}")
+            break
+
+    # Loading model from temporary storage
+    load_model(model)
+    return model.encoder
 
 def train_cls(data_dict, model_name, batch_size, max_len, device, params, training_type="cls"):
     # Three training types are allowed:
@@ -105,6 +175,17 @@ def get_sim_cls_dataloader(df, tokenizer, max_len, batch_size, is_train):
     y = torch.LongTensor(np.stack(df.label.values))
 
     data_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X_first, X_second, y), batch_size=batch_size, shuffle=is_train)
+
+    return data_loader
+
+def get_input_label_text_dataloader(df, tokenizer, max_len, batch_size, is_train):
+    # Creates a dataloader for input/output text dataset
+
+    # Tokenize and convert to input IDs
+    input_ids = get_inputs(df.input_text, tokenizer, max_len)
+    label_ids = get_inputs(df.output_text, tokenizer, max_len)
+
+    data_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(input_ids, label_ids), batch_size=batch_size, shuffle=is_train)
 
     return data_loader
 
