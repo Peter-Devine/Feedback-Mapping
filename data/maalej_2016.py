@@ -47,8 +47,9 @@ class Maalej2016(DownloadUtilBase):
         df = pd.DataFrame(df_data)
 
         df["title"] = df.title.fillna("")
-        df["text"] = df.title + df.title.apply(lambda x: "" if len(x)<1 else ". ") + df.comment
+        df["text"] = df.comment
         df["sublabel"] = df["rating"]
+        df["subtext"] = df["title"]
 
         # We drop title and comments as they can have bad characters which mess up the csv file
         df = df.drop(["title", "comment"], axis=1)
