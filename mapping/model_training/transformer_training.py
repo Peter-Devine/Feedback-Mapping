@@ -44,7 +44,7 @@ def train_t5_generation(train_df, val_df, model_name, batch_size, max_len, devic
 def t5_training(model, train_dataloader, val_dataloader, optimizer, epochs, patience):
 
     epochs_since_last_best = 0
-    best_score = 0
+    best_score = -1
     # Cycle through epochs
     for epoch in tqdm(range(epochs), desc="Epoch"):
         # At each epoch, cycle through batches
@@ -201,7 +201,7 @@ def get_labels(labels, label_dict=None):
 def train_on_datasets(tasks_dict, loss_fn, epochs, patience, device, target_metric):
 
     epochs_since_last_best = 0
-    best_score = 0
+    best_score = -1
 
     for epoch in tqdm(range(epochs), desc="Epoch"):
 

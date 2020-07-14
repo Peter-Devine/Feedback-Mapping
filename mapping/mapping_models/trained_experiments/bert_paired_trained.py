@@ -120,8 +120,8 @@ class BertPairedTrainedMapper(BaseMapper):
     def train_model(self, model_path):
         train_df, valid_df = self.get_auxiliary_dataset()
 
-        self.save_preprocessed_df(train_df, f"{self.test_dataset}_train")
-        self.save_preprocessed_df(valid_df, f"{self.test_dataset}_val")
+        self.save_preprocessed_df(train_df, f"paired_train")
+        self.save_preprocessed_df(valid_df, f"paired_val")
 
         training_data_dict = {self.test_dataset: (train_df, valid_df)}
 
