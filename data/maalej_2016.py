@@ -46,7 +46,6 @@ class Maalej2016(DownloadUtilBase):
 
         df = pd.DataFrame(df_data)
 
-        df["title"] = df.title.fillna(" ")
         df["text"] = df.comment
         df["sublabel"] = df["rating"]
         df["subtext"] = df["title"]

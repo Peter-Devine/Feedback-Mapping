@@ -35,6 +35,8 @@ class T5GenTrainedMapper(BaseMapper):
         valid_df = self.get_dataset(self.test_dataset, split="val")
 
         def prepare_gen_df(df):
+            df = df[~df["subtext"].isna()]
+
             df["input_text"] = df["text"]
             df["output_text"] = df["subtext"]
             return df
