@@ -19,6 +19,7 @@ from mapping.mapping_models.trained_experiments.bert_cls_trained_mtl_except impo
 from mapping.mapping_models.trained_experiments.bert_nsp_trained_test import BertNspTrainedTestMapper
 from mapping.mapping_models.trained_experiments.bert_nsp_trained_test_and_train import BertNspTrainedTestAndTrainMapper
 from mapping.mapping_models.trained_experiments.bert_paired_trained import BertPairedTrainedMapper
+from mapping.mapping_models.trained_experiments.t5_gen_trained import T5GenTrainedMapper
 from mapping.mapping_models.random import RandomMapper
 
 MAPPER_DICT = {
@@ -43,6 +44,7 @@ MAPPER_DICT = {
     "bert_nsp_trained_test_and_train": BertNspTrainedTestAndTrainMapper,
     "bert_nsp_trained_mtl": BertNspTrainedMtlMapper,
     "bert_paired_trained": BertPairedTrainedMapper,
+    "t5_gen_trained": T5GenTrainedMapper,
     "random": RandomMapper,
 }
 
