@@ -1,4 +1,5 @@
 from mapping.mapping_models.keyword_matching import KeywordMatchingMapper
+from mapping.mapping_models.sublabel_naive import SublabelNaiveMapper
 from mapping.mapping_models.use import UseMapper
 from mapping.mapping_models.bert_vanilla import BertVanillaMapper
 from mapping.mapping_models.tfidf_pca import TfidfPcaMapper
@@ -13,6 +14,8 @@ from mapping.mapping_models.trained_experiments.bert_cls_trained import BertClsT
 from mapping.mapping_models.trained_experiments.bert_cls_trained_mtl import BertClsTrainedMtlMapper
 from mapping.mapping_models.trained_experiments.bert_cls_trained_sim import BertClsTrainedSimMapper
 from mapping.mapping_models.trained_experiments.bert_cls_trained_sublabel import BertClsTrainedSublabelMapper
+from mapping.mapping_models.trained_experiments.bert_cls_trained_sublabel_test import BertClsTrainedSublabelTestMapper
+from mapping.mapping_models.trained_experiments.bert_cls_trained_sublabel_mtl import BertClsTrainedSublabelMtlMapper
 from mapping.mapping_models.trained_experiments.bert_nsp_trained import BertNspTrainedMapper
 from mapping.mapping_models.trained_experiments.bert_nsp_trained_mtl import BertNspTrainedMtlMapper
 from mapping.mapping_models.trained_experiments.bert_cls_trained_mtl_except import BertClsTrainedMtlExceptMapper
@@ -24,6 +27,7 @@ from mapping.mapping_models.random import RandomMapper
 
 MAPPER_DICT = {
     "keyword_matching": KeywordMatchingMapper,
+    "sublabel_naive": SublabelNaiveMapper,
     "use": UseMapper,
     "bert_vanilla": BertVanillaMapper,
     "tfidf_pca": TfidfPcaMapper,
@@ -39,6 +43,8 @@ MAPPER_DICT = {
     "bert_cls_trained_mtl_except": BertClsTrainedMtlExceptMapper,
     "bert_cls_trained_sim": BertClsTrainedSimMapper,
     "bert_cls_trained_sublabel": BertClsTrainedSublabelMapper,
+    "bert_cls_trained_sublabel_test": BertClsTrainedSublabelTestMapper,
+    "bert_cls_trained_sublabel_mtl": BertClsTrainedSublabelMtlMapper,
     "bert_nsp_trained": BertNspTrainedMapper,
     "bert_nsp_trained_test": BertNspTrainedTestMapper,
     "bert_nsp_trained_test_and_train": BertNspTrainedTestAndTrainMapper,

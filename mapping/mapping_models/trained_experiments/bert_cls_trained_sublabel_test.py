@@ -9,7 +9,7 @@ from mapping.mapping_models.mapping_models_base import BaseMapper
 from mapping.model_training.transformer_training import train_cls
 from utils.bert_utils import get_lm_embeddings
 
-class BertClsTrainedSublabelMapper(BaseMapper):
+class BertClsTrainedSublabelTestMapper(BaseMapper):
 
     def get_embeds(self):
         test_df = self.get_dataset(self.test_dataset, split="test")
@@ -32,6 +32,8 @@ class BertClsTrainedSublabelMapper(BaseMapper):
 
     def train_model(self, model_path):
         train_df = self.get_dataset(self.test_dataset, split="train")
+        test_df = self.get_dataset(self.test_dataset, split="test")
+        train_df = train_df.append(test_df).reset_index(drop=True)
         valid_df = self.get_dataset(self.test_dataset, split="val")
 
         assert "sublabel1" in train_df.columns, f"'sublabel1' is not in columns {train_df.columns} in dataset {self.test_dataset}. Cannot perform sublabel classification."
@@ -59,4 +61,4 @@ class BertClsTrainedSublabelMapper(BaseMapper):
         torch.save(model.state_dict(), model_path)
 
     def get_mapping_name(self):
-        return f"bert_cls_trained_sublabel"
+        return f"bert_cls_trained_sublabel_test"
