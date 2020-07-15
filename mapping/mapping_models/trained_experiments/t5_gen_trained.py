@@ -48,7 +48,7 @@ class T5GenTrainedMapper(BaseMapper):
             "lr": 5e-5,
             "eps": 1e-6,
             "wd": 0.01,
-            "epochs": int(10000/train_df.shape[0]),
+            "epochs": 2+int(20000/train_df.shape[0]),
             "patience": 2
         }
 
