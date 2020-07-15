@@ -63,10 +63,12 @@ class BaseMapper:
         create_dir(preprocessed_mapping_dir)
         df.to_csv(os.path.join(preprocessed_mapping_dir, f"{filename}.csv"))
 
-    def read_or_create_model(self, model_file_path):
+    def read_or_create_model(self, model_file_path, model=None):
         self.set_parameters()
 
-        model = AutoModel.from_pretrained(self.model_name)
+        # If we have not been supplied with a model, then initialize one from the huggingface library
+        if model is None:
+            model = AutoModel.from_pretrained(self.model_name)
 
         if not os.path.exists(model_file_path):
             print(f"Running training to create {model_file_path}")

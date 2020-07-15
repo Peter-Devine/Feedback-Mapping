@@ -4,7 +4,7 @@ import os
 from tqdm import tqdm
 
 import torch
-from transformers import AutoModel
+from transformers import T5ForConditionalGeneration
 from mapping.mapping_models.mapping_models_base import BaseMapper
 from mapping.model_training.transformer_training import train_t5_generation
 from utils.bert_utils import get_lm_embeddings
@@ -26,7 +26,9 @@ class T5GenTrainedMapper(BaseMapper):
     def get_model(self):
         model_path = os.path.join(self.model_dir, f"{self.test_dataset}.pt")
 
-        model = self.read_or_create_model(model_path)
+        model = T5ForConditionalGeneration.from_pretrained(self.model_name).encoder
+
+        model = self.read_or_create_model(model_path, model=model)
 
         return model
 
