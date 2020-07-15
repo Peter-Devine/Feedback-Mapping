@@ -47,7 +47,7 @@ class Maalej2016(DownloadUtilBase):
         df = pd.DataFrame(df_data)
 
         df["text"] = df.comment
-        df["sublabel"] = df["rating"]
+        df["sublabel1"] = df["rating"]
         df["subtext"] = df["title"]
 
         # We drop title and comments as they can have bad characters which mess up the csv file

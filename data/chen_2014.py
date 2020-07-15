@@ -23,9 +23,14 @@ class Chen2014(DownloadUtilBase):
             def df_getter(data_path, label):
                 with open(data_path, "r", encoding="iso-8859-1") as f:
                     data = f.read()
-                return pd.DataFrame({"text": [" ".join(x.split()[2:]) for x in data.split("\n") if len(x) > 0],
+
+                reviews = [" ".join(x.split()[2:]) for x in data.split("\n") if len(x) > 0]
+                ratings = [x.split()[1] for x in data.split("\n") if len(x) > 0]
+                
+                return pd.DataFrame({"text": reviews,
                                      "label": label,
-                                     "sublabel": app_name})
+                                     "sublabel1": app_name,
+                                     "sublabel2": ratings})
 
             train_info = df_getter(os.path.join(task_data_path, "datasets", app_name, "trainL", "info.txt"), "informative")
             train_noninfo = df_getter(os.path.join(task_data_path, "datasets", app_name, "trainL", "non-info.txt"), "non-informative")

@@ -4,7 +4,7 @@ from data.download_util_base import DownloadUtilBase
 class Guzman2015(DownloadUtilBase):
     def download(self):
         df = pd.read_csv("https://ase.in.tum.de/lehrstuhl_1/images/publications/Emitza_Guzman_Ortega/truthset.tsv",
-                         sep="\t", names=[0, "label", 2, "app", 4, "text"])
+                         sep="\t", names=[0, "label", 2, "app", "rating", "text"])
 
         int_to_str_label_map = {
             5: "Praise",
@@ -17,7 +17,8 @@ class Guzman2015(DownloadUtilBase):
             8: "Noise"
         }
         df["label"] = df.label.apply(lambda x: int_to_str_label_map[x])
-        df["sublabel"] = df["app"]
+        df["sublabel1"] = df["app"]
+        df["sublabel2"] = df["rating"]
 
         int_to_app_name_map = {
             6: "Picsart",

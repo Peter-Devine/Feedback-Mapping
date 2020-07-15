@@ -35,8 +35,8 @@ class BertClsTrainedSublabelMapper(BaseMapper):
         valid_df = self.get_dataset(self.test_dataset, split="val")
 
         assert "sublabel" in train_df.columns, f"'sublabel' is not in columns {train_df.columns} in dataset {self.test_dataset}. Cannot perform sublabel classification."
-        train_df["label"] = train_df["sublabel"]
-        valid_df["label"] = valid_df["sublabel"]
+        train_df["label"] = train_df["sublabel1"]
+        valid_df["label"] = valid_df["sublabel1"]
 
         # Make sure that valid does not have labels that were not included in train
         valid_df = valid_df[valid_df.label.apply(lambda x: x in train_df.label.unique())]

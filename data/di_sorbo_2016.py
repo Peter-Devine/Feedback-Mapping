@@ -28,9 +28,10 @@ class DiSorbo2016(DownloadUtilBase):
 
             label_upper_element = [x for x in soup.find_all("sup")]
             text_list = [x.findNext('a').text for x in label_upper_element]
+            aspect_list = [x.findPrevious('h2').text for x in label_upper_element]
             label_list = [x.find('b').text for x in label_upper_element]
 
-            full_review_df = pd.DataFrame({"text": text_list, "label": label_list, "sublabel": app_name})
+            full_review_df = pd.DataFrame({"text": text_list, "label": label_list, "sublabel1": app_name, "sublabel2": aspect_list})
 
             if df is None:
                 df = full_review_df
