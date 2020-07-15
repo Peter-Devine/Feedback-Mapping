@@ -86,7 +86,7 @@ class BertPairedTrainedMapper(BaseMapper):
             full_merged_df = pd.merge(first_merged_df, text_df, how='inner', left_on="second_text_id", right_on="bug_id", suffixes=("_first", "_second"))
 
             # The original dataset has labels of 1 and -1, so we fix that to make it 1 and 0
-            full_merged_df["label"] = full_merged_df["label"].apply(lambda x: x if x == 1 else 0)
+            full_merged_df["label"] = full_merged_df["label"].apply(lambda x: 1 if int(x) == 1 else 0)
 
             paired_df = full_merged_df[["short_desc_first", "short_desc_second", "label"]]
             paired_df = paired_df.rename(columns = {"short_desc_first": "first_text", "short_desc_second": "second_text"})
