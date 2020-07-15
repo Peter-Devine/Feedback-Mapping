@@ -24,7 +24,7 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
         self.batch_size = 64
 
     def get_model(self):
-        model_path = os.path.join(self.model_dir, f"{self.test_dataset}.pt")
+        model_path = os.path.join(self.model_dir, f"all.pt")
 
         model = self.read_or_create_model(model_path)
 
@@ -69,4 +69,4 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
         torch.save(model.state_dict(), model_path)
 
     def get_mapping_name(self):
-        return f"bert_cls_trained_sublabel"
+        return f"bert_cls_trained_sublabel_mtl"
