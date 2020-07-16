@@ -16,6 +16,7 @@ from mapping.mapping_models.trained_experiments.bert_cls_trained_sim import Bert
 from mapping.mapping_models.trained_experiments.bert_cls_trained_sublabel import BertClsTrainedSublabelMapper
 from mapping.mapping_models.trained_experiments.bert_cls_trained_sublabel_test import BertClsTrainedSublabelTestMapper
 from mapping.mapping_models.trained_experiments.bert_cls_trained_sublabel_mtl import BertClsTrainedSublabelMtlMapper
+from mapping.mapping_models.trained_experiments.bert_cls_trained_sublabel_mtl_test import BertClsTrainedSublabelMtlTestMapper
 from mapping.mapping_models.trained_experiments.bert_nsp_trained import BertNspTrainedMapper
 from mapping.mapping_models.trained_experiments.bert_nsp_trained_mtl import BertNspTrainedMtlMapper
 from mapping.mapping_models.trained_experiments.bert_cls_trained_mtl_except import BertClsTrainedMtlExceptMapper
@@ -45,6 +46,7 @@ MAPPER_DICT = {
     "bert_cls_trained_sublabel": BertClsTrainedSublabelMapper,
     "bert_cls_trained_sublabel_test": BertClsTrainedSublabelTestMapper,
     "bert_cls_trained_sublabel_mtl": BertClsTrainedSublabelMtlMapper,
+    "bert_cls_trained_sublabel_mtl_test": BertClsTrainedSublabelMtlTestMapper,
     "bert_nsp_trained": BertNspTrainedMapper,
     "bert_nsp_trained_test": BertNspTrainedTestMapper,
     "bert_nsp_trained_test_and_train": BertNspTrainedTestAndTrainMapper,
