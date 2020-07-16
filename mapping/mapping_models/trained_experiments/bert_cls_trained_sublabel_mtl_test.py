@@ -21,7 +21,7 @@ class BertClsTrainedSublabelMtlTestMapper(BaseMapper):
     def set_parameters(self):
         self.model_name = 'bert-base-uncased'
         self.max_length = 128
-        self.batch_size = 64
+        self.batch_size = 24
 
     def get_model(self):
         model_path = os.path.join(self.model_dir, f"all.pt")
