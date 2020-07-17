@@ -111,10 +111,28 @@ def cluster_kmeans(embeddings, labels):
 def output_df(df, file_name):
     df.to_csv(f"{file_name}.csv")
 
+def get_avg_max_fraction(labels, preds):
+    max_fractions = []
+
+    # Finds the maximum fraction for any one label in a fraction for each cluster, and then averages this value over all clusters
+    for pred in preds.unique():
+        in_cluster_labels = labels[preds==pred]
+
+        max_fraction = in_cluster_labels.value_counts(normalize=True).max()
+
+        max_fractions.append(max_fraction)
+
+    if len(max_fractions) < 1:
+        raise Exception(f"No clusters detected when comparing {labels} to {preds}. Max fractions were {max_fractions}")
+
+    return sum(max_fractions) / len(max_fractions)
+
 def score_clustering(labels, preds):
     # Score clustering predictions compared to real labels
     scorings = {}
     scorings["homogeneity"] = homogeneity_score(labels, preds)
+    scorings["avg_max_frac"] = get_avg_max_fraction(labels, preds)
+    scorings["num_clusters"] = len(preds.unique())
     return pd.DataFrame(scorings, index=["scorings"])
 
 def get_cluster_compositions(labels, preds):
