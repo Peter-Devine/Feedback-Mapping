@@ -10,7 +10,7 @@ class EnsembleMapper(BaseMapper):
         embedding_files_data = get_embeddings_paths(self.test_dataset)
 
         # Go through all the available embeddings, and if we have some "gold standard" embeddings available, then we will just use those
-        good_embeddings = ["sbert", "use"]
+        good_embeddings = ["sbert", "use", "bert_cls_trained_sublabel_mtl_test"]
         do_only_good_embeddings = False
         for embedding_file, embedding_name in embedding_files_data:
             if embedding_name in good_embeddings:
@@ -23,6 +23,9 @@ class EnsembleMapper(BaseMapper):
                 continue
 
             embeddings, labels = get_embedding_data(embedding_file)
+
+            # We normalize embeddings so that the average magnitude of vectors is 1
+            embeddings = embeddings / (np.linalg.norm(embeddings, axis=1).mean())
 
             if concatenated_embedding is None:
                 concatenated_embedding = embeddings
