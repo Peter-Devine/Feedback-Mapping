@@ -12,6 +12,7 @@ def get_random_seed():
     try:
         seed_value_str = os.environ[seed_env_var_name]
         seed_value = int(seed_value_str)
+        return seed_value
     except Exception as err:
         raise Exception("Random seed has not been set yet. Please set before running.")
 
