@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import numpy as np
 
 from sklearn.cluster import KMeans
 from sklearn.metrics import homogeneity_score
@@ -115,7 +116,7 @@ def get_avg_max_fraction(labels, preds):
     max_fractions = []
 
     # Finds the maximum fraction for any one label in a fraction for each cluster, and then averages this value over all clusters
-    for pred in preds.unique():
+    for pred in np.unique(preds):
         in_cluster_labels = labels[preds==pred]
 
         max_fraction = in_cluster_labels.value_counts(normalize=True).max()
@@ -132,7 +133,7 @@ def score_clustering(labels, preds):
     scorings = {}
     scorings["homogeneity"] = homogeneity_score(labels, preds)
     scorings["avg_max_frac"] = get_avg_max_fraction(labels, preds)
-    scorings["num_clusters"] = len(preds.unique())
+    scorings["num_clusters"] = len(np.unique(preds))
     return pd.DataFrame(scorings, index=["scorings"])
 
 def get_cluster_compositions(labels, preds):
