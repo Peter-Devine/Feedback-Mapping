@@ -34,7 +34,7 @@ class BertClsTrainedSublabelOutsideMapper(BaseMapper):
     def get_auxiliary_dataset(self):
         # Use the review dataset gathered for https://giograno.me/assets/pdf/workshop/wama17.pdf
         df = pd.read_csv("https://raw.githubusercontent.com/sealuzh/user_quality/master/csv_files/reviews.csv", index_col=0)
-        df = df.rename({"review": "text", "star": "label", "package_name": "sublabel1"})
+        df = df.rename(columns={"review": "text", "star": "label", "package_name": "sublabel1"})
 
         train_df = df.sample(frac=0.7, random_state = get_random_seed())
         val_df = df.drop(train_df.index)
