@@ -30,9 +30,6 @@ def cluster_single_dataset(dataset_name, embedding_file, embedding_name):
     # Cluster on embeddings and get predicted cluster membership
     preds, kmeans = cluster_kmeans(embeddings, labels)
 
-    # Score predictions compared to golds
-    scores = score_clustering(labels, preds, embeddings)
-
     # Get the compositions of each cluster
     compositions = get_cluster_compositions(labels, preds)
 
@@ -41,6 +38,9 @@ def cluster_single_dataset(dataset_name, embedding_file, embedding_name):
 
     # Get the text of the observations closest to the centroid for each cluster
     example_obs = get_examples_text(closest_idx, dataset_name)
+
+    # Score predictions compared to golds
+    scores = score_clustering(labels, preds, embeddings, example_obs)
 
     output_results(scores, compositions, example_obs, dataset_name, embedding_name)
 
@@ -150,13 +150,14 @@ def get_knn_similarity_score(labels, embeddings, k=5):
 
     return avg_similar_neighbours
 
-def score_clustering(labels, preds, embeddings):
+def score_clustering(labels, preds, embeddings, example_obs):
     # Score clustering predictions compared to real labels
     scorings = {}
     scorings["homogeneity"] = homogeneity_score(labels, preds)
     scorings["avg_max_frac"] = get_avg_max_fraction(labels, preds)
     scorings["num_clusters"] = len(np.unique(preds))
     scorings["knn_sim"] = get_knn_similarity_score(labels, embeddings, k=5)
+    scorings["unique_centers"] = len(example_obs.label.unique())
     return pd.DataFrame(scorings, index=["scorings"])
 
 def get_cluster_compositions(labels, preds):
