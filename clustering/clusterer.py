@@ -91,8 +91,12 @@ def get_embedding_data(embedding_file):
     # Read embedding csv file to df
     embedding_df = pd.read_csv(embedding_file, index_col = 0)
 
-    # Get gold label for each embedding
-    labels = embedding_df["label"]
+    # Get gold label for each embedding (as fine as possible)
+    # If a dataset supports a fine dataset, then use those fine labels. Generally, a dataset will only have one label-set however, so we use the same training and eval label type for most datasets.
+    if "fine_label" in embedding_df.columns:
+        labels = embedding_df["fine_label"]
+    else:
+        labels = embedding_df["label"]
 
     # Get embedding values
     embeddings = embedding_df.drop("label", axis=1)
