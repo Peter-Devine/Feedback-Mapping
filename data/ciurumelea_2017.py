@@ -5,6 +5,7 @@ import io
 import shutil
 
 import pandas as pd
+import numpy as np
 from data.download_util_base import DownloadUtilBase
 
 class Ciurumelea2017(DownloadUtilBase):
