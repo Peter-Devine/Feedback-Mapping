@@ -24,6 +24,8 @@ class Ciurumelea2017(DownloadUtilBase):
         shutil.rmtree(task_data_path)
 
         df["text"] = df.reviewText
+        df["sublabel1"] = df.ratingStars
+        df["sublabel2"] = df.app
 
         # Make the multi-label dataset a repeated single-label dataset
         # E.g. one observation with the labels "SECURITY" and "BATTERY" would become two identical rows, but one with the label "SECURITY" and the other the label "BATTERY"
