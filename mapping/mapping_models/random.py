@@ -12,7 +12,7 @@ class RandomMapper(BaseMapper):
 
         embedding = np.random.rand(num_observations, desired_dim)
 
-        return embedding, df.label
+        return embedding, df
 
     def get_mapping_name(self):
         return "random"

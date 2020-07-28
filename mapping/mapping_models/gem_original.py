@@ -21,7 +21,7 @@ class GemMapper(BaseMapper):
 
         embeddings = self.encoder(df.text, df.text)
 
-        return embeddings, df.label
+        return embeddings, df
 
     def get_mapping_name(self):
         return "gem-original"

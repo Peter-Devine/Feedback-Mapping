@@ -21,7 +21,7 @@ class BertNspTrainedTestMapper(BaseMapper):
 
         all_embeddings = get_lm_embeddings(self, test_df, f"{self.test_dataset} test NSP trained")
 
-        return all_embeddings, test_df.label
+        return all_embeddings, test_df
 
     def set_parameters(self):
         self.model_name = 'bert-base-uncased'

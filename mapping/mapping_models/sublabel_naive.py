@@ -14,7 +14,7 @@ class SublabelNaiveMapper(BaseMapper):
 
         all_embeddings = np.stack(all_embeddings)
 
-        return all_embeddings, test_df.label
+        return all_embeddings, test_df
 
     def get_mapping_name(self):
         return "sublabel_naive"

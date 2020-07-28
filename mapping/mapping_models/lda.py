@@ -15,7 +15,7 @@ class LdaMapper(BaseMapper):
         lda = LatentDirichletAllocation(n_components=100, max_iter=5, learning_method='online', learning_offset=50., random_state=get_random_seed())
         embeddings = lda.fit_transform(bow_embed)
 
-        return embeddings, df.label
+        return embeddings, df
 
     def get_mapping_name(self):
         return "lda"

@@ -19,7 +19,7 @@ class SBertWKMapper(BaseMapper):
         # Get embeddings from text series
         embeddings = self.get_sentence_embeds(df.text.values)
 
-        return embeddings, df.label
+        return embeddings, df
 
     def get_sentence_embeds(self, sentences):
         self.model_name = "binwang/bert-base-nli"

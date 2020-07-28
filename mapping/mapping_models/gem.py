@@ -20,7 +20,7 @@ class GemMapper(BaseMapper):
 
         embedder = SentenceEmbedder(df.text, embedding_matrix, vocab)
         embeddings = embedder.gem()
-        return embeddings, df.label
+        return embeddings, df
 
     def download_and_get_matrix(self, embedding_size):
         glove_dir = os.path.join(self.model_repo_dir, "glove")

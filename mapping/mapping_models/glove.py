@@ -47,7 +47,7 @@ class GloveMapper(BaseMapper):
 
         embeddings = np.stack(embeddings)
 
-        return embeddings, df.label
+        return embeddings, df
 
     def get_word_vector_dict(self, file_name):
         embeddings_dict = {}

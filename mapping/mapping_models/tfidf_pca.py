@@ -13,7 +13,7 @@ class TfidfPcaMapper(BaseMapper):
         pca = TruncatedSVD(n_components=100)
         low_dim_embed = pca.fit_transform(tf_idf_embed)
 
-        return low_dim_embed, df.label
+        return low_dim_embed, df
 
     def get_mapping_name(self):
         return "tfidf_pca"

@@ -32,6 +32,9 @@ class EnsembleMapper(BaseMapper):
             else:
                 concatenated_embedding = np.concatenate([concatenated_embedding,embeddings], axis=1)
 
+        # When get_embeds() is called, a numpy array of embeddings and a dataframe with label data is expected, so we pass labels as a df
+        labels = pd.DataFrame({"label": labels})
+
         return concatenated_embedding, labels
 
     def get_mapping_name(self):

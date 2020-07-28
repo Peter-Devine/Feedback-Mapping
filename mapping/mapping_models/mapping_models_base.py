@@ -91,7 +91,7 @@ class BaseMapper:
         # Return the df of all datasets in raw folder
         return all_datasets
 
-    def output_embeddings(self, embedding, labels):
+    def output_embeddings(self, embedding, df):
         # Make sure the embedding folder exists
         dataset_embedding_folder = os.path.join(self.output_dataset_dir, self.test_dataset)
         create_dir(dataset_embedding_folder)
@@ -100,9 +100,11 @@ class BaseMapper:
         dataset_embedding_file = os.path.join(dataset_embedding_folder, f"{self.mapping_name}.csv")
 
         # Get Dataframe from embeddings array
-        embedding_df = pd.DataFrame(embedding, index=labels.index)
+        embedding_df = pd.DataFrame(embedding, index=df.index)
 
-        embedding_df["label"] = labels
+        # Set the fine_label (I.e. the more fine-grained label which no model has been trained on) as the label if available. Else, set it as the training labels
+        label_col = "fine_label" if "fine_label" in  df.columns else "label"
+        embedding_df["label"] = df[label_col]
 
         embedding_df.to_csv(dataset_embedding_file)
 

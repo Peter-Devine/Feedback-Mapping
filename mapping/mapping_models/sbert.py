@@ -15,7 +15,7 @@ class SBertMapper(BaseMapper):
         BATCH_SIZE = 64
         sentence_embeddings = model.encode(df.text.values, batch_size = BATCH_SIZE, show_progress_bar = True)
 
-        return sentence_embeddings, df.label
+        return sentence_embeddings, df
 
     def get_mapping_name(self):
         return "sbert"

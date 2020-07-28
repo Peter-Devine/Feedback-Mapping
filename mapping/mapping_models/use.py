@@ -22,7 +22,7 @@ class UseMapper(BaseMapper):
         embeddings = embed(df["text"])
 
         # return embeddings and labels associated with those embeddings
-        return embeddings.numpy(), df.label
+        return embeddings.numpy(), df
 
     def get_model(self):
         # Check to see if a USE model file has already been downloaded.

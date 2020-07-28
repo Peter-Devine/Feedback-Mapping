@@ -17,7 +17,7 @@ class BertVanillaMapper(BaseMapper):
 
         all_embeddings = get_lm_embeddings(self, test_df, f"{self.get_mapping_name()}")
 
-        return all_embeddings, test_df.label
+        return all_embeddings, test_df
 
     def get_model(self):
         model = AutoModel.from_pretrained(self.model_name)

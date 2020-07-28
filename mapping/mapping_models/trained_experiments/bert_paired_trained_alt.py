@@ -21,7 +21,7 @@ class BertPairedTrainedAltMapper(BaseMapper):
 
         all_embeddings = get_lm_embeddings(self, test_df, f"{self.get_mapping_name()}")
 
-        return all_embeddings, test_df.label
+        return all_embeddings, test_df
 
     def set_parameters(self):
         self.model_name = 'bert-base-uncased'
