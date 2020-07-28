@@ -7,6 +7,7 @@ import matplotlib.cm as cm
 import pandas as pd
 
 from sklearn.decomposition import PCA
+import umap
 
 from clustering.clusterer import get_embeddings_paths, get_embedding_data
 from utils.utils import create_dir
@@ -29,9 +30,24 @@ def visualise_single_dataset(dataset_name, embedding_file, embedding_name):
     # From each embedding file, takeout the numerical embeddings and labels
     embeddings, labels = get_embedding_data(embedding_file)
     # Map the high dim embeddings to a 2D space
-    twoD_mapping_df = get_PCA_two_D_df(embeddings, labels)
+    twoD_mapping_df = get_UMAP_two_D_df(embeddings, labels)
     # Output the resulting 2D space to a graph
     graph_PCA_data(twoD_mapping_df, dataset_name, embedding_name)
+
+def get_UMAP_two_D_df(embeddings, labels):
+    # Initialize the UMAP model to map multi dimensional embeddings to simple 2D embedding
+    reducer = umap.UMAP(n_neighbors=15, n_components=2)
+
+    # Fit this model to the given data and transform it to 2D space
+    twoD_mapping = reducer.fit_transform(embeddings)
+
+    # Make the embeddings into a DataFrame
+    twoD_mapping_df = pd.DataFrame(twoD_mapping, index=embeddings.index)
+
+    # Add the labels of each embedding to the dataframe
+    twoD_mapping_df["label"] = labels
+
+    return twoD_mapping_df
 
 def get_PCA_two_D_df(embeddings, labels):
     # Initialize the PCA model to map multi dimensional embeddings to simple 2D embedding
