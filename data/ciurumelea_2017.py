@@ -60,4 +60,6 @@ class Ciurumelea2017(DownloadUtilBase):
         val = train_and_val.drop(train.index)
         test = repeated_df.drop(train_and_val.index)
 
+        test = test[test.label == "COMPATIBILITY"]
+
         super(Ciurumelea2017, self).download(train, val, test)
