@@ -26,7 +26,6 @@ class Ciurumelea2017(DownloadUtilBase):
 
         df["text"] = df.reviewText
         df["sublabel"] = df.ratingStars
-        df["app"] = df.app
 
         # Make the multi-label dataset a repeated single-label dataset
         # E.g. one observation with the labels "SECURITY" and "BATTERY" would become two identical rows, but one with the label "SECURITY" and the other the label "BATTERY"
