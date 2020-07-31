@@ -58,16 +58,37 @@ class Williams2017(DownloadUtilBase):
             "date_posted": date_posted
         })
 
-        df["sublabel1"] = df["timezone"]
-        sublabel_vc = df["sublabel1"].value_counts()
-        sublabel_high_vc = sublabel_vc[sublabel_vc > 10]
-        df["sublabel1"] = df["sublabel1"].apply(lambda x: x if x in sublabel_high_vc else "OTHER")
+        def group_follower_count(value):
+            # We parse value as int
+            value = int(value)
 
+            # Get a grouped value for number of followers, numbers of which are roughly comparable for each bin
+            if value < 50:
+                return "0-50 followers"
+            elif value < 100:
+                return "50-100 followers"
+            elif value < 200:
+                return "100-200 followers"
+            elif value < 300:
+                return "200-300 followers"
+            elif value < 400:
+                return "300-400 followers"
+            elif value < 500:
+                return "400-500 followers"
+            else:
+                return "500+ followers"
+
+        df["sublabel"] = df["n_followers"].apply(group_follower_count)
+
+        def get_app_name(tweet):
+            # Find the name of the software system that the tweet was primarily addressed to. The handle should be the first word in the tweet
+            first_word = tweet.split()[0]
+            assert first_word[0] == "@", f"First word was expected to be '@' + something but was {first_word} in tweet {tweet} in Williams dataset"
+            return first_word
+
+        df["app"] = df["text"].apply(get_app_name)
+
+        # Delete all temporary zip files etc.
         shutil.rmtree(task_data_path)
 
-        train_and_val = df.sample(frac=0.7, random_state=self.random_state)
-        train = train_and_val.sample(frac=0.7, random_state=self.random_state)
-        val = train_and_val.drop(train.index)
-        test = df.drop(train_and_val.index)
-
-        super(Williams2017, self).download(train, val, test)
+        super(Williams2017, self).download(df)

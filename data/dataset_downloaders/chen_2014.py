@@ -26,11 +26,11 @@ class Chen2014(DownloadUtilBase):
 
                 reviews = [" ".join(x.split()[2:]) for x in data.split("\n") if len(x) > 0]
                 ratings = [x.split()[1] for x in data.split("\n") if len(x) > 0]
-                
+
                 return pd.DataFrame({"text": reviews,
                                      "label": label,
-                                     "sublabel1": app_name,
-                                     "sublabel2": ratings})
+                                     "app": app_name,
+                                     "sublabel": ratings})
 
             train_info = df_getter(os.path.join(task_data_path, "datasets", app_name, "trainL", "info.txt"), "informative")
             train_noninfo = df_getter(os.path.join(task_data_path, "datasets", app_name, "trainL", "non-info.txt"), "non-informative")
@@ -58,8 +58,6 @@ class Chen2014(DownloadUtilBase):
 
         shutil.rmtree(task_data_path)
 
-        train = all_train_val.sample(frac=0.7, random_state=self.random_state)
-        val = all_train_val.drop(train.index)
-        test = all_test
+        dataset = append_df(all_train_val, all_test)
 
-        super(Chen2014, self).download(train, val, test)
+        super(Chen2014, self).download(dataset)

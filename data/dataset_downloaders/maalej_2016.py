@@ -47,15 +47,12 @@ class Maalej2016(DownloadUtilBase):
         df = pd.DataFrame(df_data)
 
         df["text"] = df.comment
-        df["sublabel1"] = df["rating"]
-        df["subtext"] = df["title"]
+        df["sublabel"] = df["rating"]
 
         # We drop title and comments as they can have bad characters which mess up the csv file
         df = df.drop(["title", "comment"], axis=1)
 
-        train_and_val = df.sample(frac=0.7, random_state=self.random_state)
-        train = train_and_val.sample(frac=0.7, random_state=self.random_state)
-        val = train_and_val.drop(train.index)
-        test = df.drop(train_and_val.index)
+        # We save the app name in the "app" column to conform to the format of other datasets
+        df["app"] = df["appId"]
 
-        super(Maalej2016, self).download(train, val, test)
+        super(Maalej2016, self).download(df)

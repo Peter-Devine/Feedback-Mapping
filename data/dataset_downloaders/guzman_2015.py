@@ -17,8 +17,7 @@ class Guzman2015(DownloadUtilBase):
             8: "Noise"
         }
         df["label"] = df.label.apply(lambda x: int_to_str_label_map[x])
-        df["sublabel1"] = df["app"]
-        df["sublabel2"] = df["rating"]
+        df["sublabel"] = df["rating"]
 
         int_to_app_name_map = {
             6: "Picsart",
@@ -32,9 +31,4 @@ class Guzman2015(DownloadUtilBase):
 
         df["app"] = df.app.apply(lambda x: int_to_app_name_map[x])
 
-        train_and_val = df.sample(frac=0.7, random_state=self.random_state)
-        train = train_and_val.sample(frac=0.7, random_state=self.random_state)
-        val = train_and_val.drop(train.index)
-        test = df.drop(train_and_val.index)
-
-        super(Guzman2015, self).download(train, val, test)
+        super(Guzman2015, self).download(df)

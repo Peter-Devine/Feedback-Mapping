@@ -83,14 +83,9 @@ class Tizard2019(DownloadUtilBase):
         df.label = df.label.apply(forum_label_transformer)
 
         df = df.rename(columns={'sentence': 'text'})
-        df["sublabel1"] = df["topic_forum"].str.lower()
-        df["sublabel2"] = df["user_level"].str.lower().str.strip()
+        df["app"] = df["topic_forum"].str.lower()
+        df["sublabel"] = df["user_level"].str.lower().str.strip()
 
         shutil.rmtree(task_data_path)
 
-        train_and_val = df.sample(frac=0.7, random_state=self.random_state)
-        train = train_and_val.sample(frac=0.7, random_state=self.random_state)
-        val = train_and_val.drop(train.index)
-        test = df.drop(train_and_val.index)
-
-        super(Tizard2019, self).download(train, val, test)
+        super(Tizard2019, self).download(df)

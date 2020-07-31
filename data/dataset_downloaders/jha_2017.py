@@ -31,14 +31,12 @@ class Jha2017(DownloadUtilBase):
             df.text = df.text.apply(lambda x: x.strip("'"))
             # Strip the unnecessary whitespace that prepends every label
             df.label = df.label.apply(lambda x: x.strip())
-
             return df
 
         train_and_val = get_jha_df("BOW_training.txt")
-        train = train_and_val.sample(frac=0.7, random_state=self.random_state)
-        val = train_and_val.drop(train.index)
         test = get_jha_df("BOW_testing.txt")
+        full_df = train_and_val.append(test).reset_index(drop=True)
 
         shutil.rmtree(task_data_path)
 
-        super(Jha2017, self).download(train, val, test)
+        super(Jha2017, self).download(full_df)

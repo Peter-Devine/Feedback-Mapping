@@ -31,7 +31,7 @@ class DiSorbo2016(DownloadUtilBase):
             aspect_list = [x.findPrevious('h2').text for x in label_upper_element]
             label_list = [x.find('b').text for x in label_upper_element]
 
-            full_review_df = pd.DataFrame({"text": text_list, "label": label_list, "sublabel1": app_name, "sublabel2": aspect_list})
+            full_review_df = pd.DataFrame({"text": text_list, "label": label_list, "app": app_name})
 
             if df is None:
                 df = full_review_df
@@ -49,9 +49,4 @@ class DiSorbo2016(DownloadUtilBase):
 
         shutil.rmtree(task_data_path)
 
-        train_and_val = all_review_df.sample(frac=0.7, random_state=self.random_state)
-        train = train_and_val.sample(frac=0.7, random_state=self.random_state)
-        val = train_and_val.drop(train.index)
-        test = all_review_df.drop(train_and_val.index)
-
-        super(DiSorbo2016, self).download(train, val, test)
+        super(DiSorbo2016, self).download(all_review_df)

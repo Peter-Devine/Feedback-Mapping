@@ -25,8 +25,8 @@ class Ciurumelea2017(DownloadUtilBase):
         shutil.rmtree(task_data_path)
 
         df["text"] = df.reviewText
-        df["sublabel1"] = df.ratingStars
-        df["sublabel2"] = df.app
+        df["sublabel"] = df.ratingStars
+        df["app"] = df.app
 
         # Make the multi-label dataset a repeated single-label dataset
         # E.g. one observation with the labels "SECURITY" and "BATTERY" would become two identical rows, but one with the label "SECURITY" and the other the label "BATTERY"
@@ -55,11 +55,4 @@ class Ciurumelea2017(DownloadUtilBase):
 
         repeated_df["label"] = repeated_df[lst_col].apply(lambda x: fine_to_coarse_dict[x])
 
-        train_and_val = repeated_df.sample(frac=0.7, random_state=self.random_state)
-        train = train_and_val.sample(frac=0.7, random_state=self.random_state)
-        val = train_and_val.drop(train.index)
-        test = repeated_df.drop(train_and_val.index)
-
-        test = test[test.label == "COMPATIBILITY"]
-
-        super(Ciurumelea2017, self).download(train, val, test)
+        super(Ciurumelea2017, self).download(repeated_df)
