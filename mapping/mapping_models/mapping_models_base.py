@@ -82,12 +82,17 @@ class BaseMapper:
         # Iterate over each folder in the raw data folder to find distinct datasets
         for item in os.listdir(self.raw_dataset_dir):
             data_folder_contents = os.path.join(self.raw_dataset_dir, item)
-            # We make sure that this is a folder
+
+            # We make sure that this is a folder, and hence a dataset containing app.csv files
             if os.path.isdir(data_folder_contents):
-                    all_datasets[item] = {}
-                    # Iterate over each app in a dataset
-                    for app_name in os.listdir(data_folder_contents):
-                        all_datasets[item][app_name] = self.get_dataset(item, app_name)
+                # We prepare a dict for this dataset
+                all_datasets[item] = {}
+
+                # Iterate over each app in the dataset
+                for app_name in os.listdir(data_folder_contents):
+
+                    # Get the df for this dataset and app, saving it to the all_datasets dict which will contain the data for every app in every dataset
+                    all_datasets[item][app_name] = self.get_dataset(item, app_name)
 
         # Return the df of all datasets in raw folder
         return all_datasets
