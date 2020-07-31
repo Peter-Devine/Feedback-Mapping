@@ -12,11 +12,11 @@ class BaseMapper:
         self.test_dataset = test_dataset
         self.overall_dataset_dir = os.path.join(".", "data")
 
-        # Raw dir
+        # Raw dir - the umbrella folder where we keep our initially downloaded data here
         self.raw_dataset_dir = os.path.join(self.overall_dataset_dir, "raw")
         assert os.path.exists(self.raw_dataset_dir), f"No raw datasets in the {self.raw_dataset_dir} path. Run data downloaders first."
 
-        # Output dir
+        # Output dir - We keep our embeddings here
         self.output_dataset_dir = os.path.join(self.overall_dataset_dir, "embeddings")
         create_dir(self.output_dataset_dir)
 
@@ -24,7 +24,7 @@ class BaseMapper:
         self.preprocessed_dataset_dir = os.path.join(self.overall_dataset_dir, "preprocessed")
         create_dir(self.preprocessed_dataset_dir)
 
-        # Preprocessed dir
+        # Auxiliary data dir - We keep extra data that we will not use for testing but that is used for training models
         self.base_auxiliary_dataset_dir = os.path.join(self.overall_dataset_dir, "auxiliary")
         create_dir(self.base_auxiliary_dataset_dir)
 
@@ -45,13 +45,9 @@ class BaseMapper:
     def get_mapping_name(self):
         raise NotImplementedError(f"get_mapping_name not implemented when running on {self.test_dataset} dataset")
 
-    def get_dataset(self, dataset, split=None):
-        # Clean splits input
-        splits = ["train", "val", "test"]
-        assert split in splits, f"Unsupported split selected ({split}) \n{splits} selected"
-
+    def get_dataset(self, dataset_name, app_name):
         # Get the path of this dataset
-        dataset_path = os.path.join(self.raw_dataset_dir, dataset, f"{split}.csv")
+        dataset_path = os.path.join(self.raw_dataset_dir, dataset_name, f"{app_name}.csv")
 
         assert os.path.exists(dataset_path), f"No file found at {dataset_path}"
 
@@ -80,13 +76,18 @@ class BaseMapper:
 
         return model
 
-    def get_all_datasets(self, split):
+    def get_all_datasets(self):
         all_datasets = {}
 
         # Iterate over each folder in the raw data folder to find distinct datasets
         for item in os.listdir(self.raw_dataset_dir):
-            if os.path.isdir(os.path.join(self.raw_dataset_dir, item)) and item[0] != ".":
-                all_datasets[item] = self.get_dataset(item, split)
+            data_folder_contents = os.path.join(self.raw_dataset_dir, item)
+            # We make sure that this is a folder
+            if os.path.isdir(data_folder_contents):
+                    all_datasets[item] = {}
+                    # Iterate over each app in a dataset
+                    for app_name in os.listdir(data_folder_contents):
+                        all_datasets[item][app_name] = self.get_dataset(item, app_name)
 
         # Return the df of all datasets in raw folder
         return all_datasets
@@ -95,22 +96,36 @@ class BaseMapper:
         # Make sure the embedding folder exists
         dataset_embedding_folder = os.path.join(self.output_dataset_dir, self.test_dataset)
         create_dir(dataset_embedding_folder)
+        app_embedding_folder = os.path.join(dataset_embedding_folder, self.app_name)
+        create_dir(app_embedding_folder)
 
         # Output the embeddings to a csv file in the embeddings folder
-        dataset_embedding_file = os.path.join(dataset_embedding_folder, f"{self.mapping_name}.csv")
+        app_embedding_file = os.path.join(app_embedding_folder, f"{self.mapping_name}.csv")
 
         # Get Dataframe from embeddings array
         embedding_df = pd.DataFrame(embedding, index=df.index)
 
-        # Set the fine_label (I.e. the more fine-grained label which no model has been trained on) as the label if available. Else, set it as the training labels
-        label_col = "fine_label" if "fine_label" in  df.columns else "label"
-        embedding_df["label"] = df[label_col]
+        # Add labels to embeddings from passed df
+        embedding_df["label"] = df["label"]
 
-        embedding_df.to_csv(dataset_embedding_file)
+        embedding_df.to_csv(app_embedding_file)
 
     def embed(self):
-        print(f"Now embedding {self.test_dataset} using {self.mapping_name}")
+        print(f"Now embedding all apps in {self.test_dataset} using {self.mapping_name}")
 
-        embeddings, labels = self.get_embeds()
+        # Iterate over each folder in the dataset to find all apps within it
+        for app_file_name in os.listdir(self.raw_dataset_specific_dir):
+            assert app_file_name[-4:] == ".csv", f"{app_file_name} file found in {self.raw_dataset_specific_dir} is not .csv. Please delete to run embedding on {self.test_dataset}"
 
-        self.output_embeddings(embeddings, labels)
+            # Get the app name sans suffix. Save it as an attribute
+            self.app_name = app_file_name[:-4]
+
+            # Run the embedding for this app
+            embedding_data = self.get_embeds()
+
+            # If the embedding_data is None, which happens when a MISC_APP.csv dataset gets used on an app specific mapper, we simply skip over it.
+            if embedding_data is None:
+                print(f"Skipping embedding {self.test_dataset} ({self.app_name}) on {self.mapping_name}")
+            else:
+                embeddings, labels = embedding_data
+                self.output_embeddings(embeddings, labels)

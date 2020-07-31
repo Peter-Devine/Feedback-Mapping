@@ -9,7 +9,6 @@ from mapping.mapping_models.sbert import SBertMapper
 from mapping.mapping_models.sbert_wk import SBertWKMapper
 from mapping.mapping_models.gem import GemMapper
 from mapping.mapping_models.t5_vanilla import T5VanillaMapper
-from mapping.mapping_models.ensemble import EnsembleMapper
 from mapping.mapping_models.trained_experiments.bert_cls_trained import BertClsTrainedMapper
 from mapping.mapping_models.trained_experiments.bert_cls_trained_mtl import BertClsTrainedMtlMapper
 from mapping.mapping_models.trained_experiments.bert_cls_trained_sim import BertClsTrainedSimMapper
@@ -24,7 +23,6 @@ from mapping.mapping_models.trained_experiments.bert_cls_trained_mtl_except impo
 from mapping.mapping_models.trained_experiments.bert_nsp_trained_test import BertNspTrainedTestMapper
 from mapping.mapping_models.trained_experiments.bert_nsp_trained_test_and_train import BertNspTrainedTestAndTrainMapper
 from mapping.mapping_models.trained_experiments.bert_paired_trained import BertPairedTrainedMapper
-from mapping.mapping_models.trained_experiments.t5_gen_trained import T5GenTrainedMapper
 from mapping.mapping_models.random import RandomMapper
 
 MAPPER_DICT = {
@@ -39,7 +37,6 @@ MAPPER_DICT = {
     "sbert_wk": SBertWKMapper,
     "gem": GemMapper,
     "t5_vanilla": T5VanillaMapper,
-    "ensemble": EnsembleMapper,
     "bert_cls_trained": BertClsTrainedMapper,
     "bert_cls_trained_mtl": BertClsTrainedMtlMapper,
     "bert_cls_trained_mtl_except": BertClsTrainedMtlExceptMapper,
@@ -54,7 +51,6 @@ MAPPER_DICT = {
     "bert_nsp_trained_test_and_train": BertNspTrainedTestAndTrainMapper,
     "bert_nsp_trained_mtl": BertNspTrainedMtlMapper,
     "bert_paired_trained": BertPairedTrainedMapper,
-    "t5_gen_trained": T5GenTrainedMapper,
     "random": RandomMapper,
 }
 
@@ -65,10 +61,6 @@ def map_data(list_of_datasets, list_of_mappings):
 
         # Remove the mappings that cannot be run on most datasets / don't play well with other mappings (USE and TF2.0 take all the memory away from PyTorch)
         list_of_mappings.remove("use")
-        list_of_mappings.remove("t5_gen_trained")
-        # Make sure that ensemble goes last so that it finds as many applicable mappings as possible
-        list_of_mappings.remove("ensemble")
-        list_of_mappings.append("ensemble")
 
     for dataset in list_of_datasets:
         for mapping in list_of_mappings:
