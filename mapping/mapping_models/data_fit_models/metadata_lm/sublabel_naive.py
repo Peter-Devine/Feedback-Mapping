@@ -4,9 +4,9 @@ from mapping.mapping_models.mapping_models_base import BaseMapper
 class SublabelNaiveMapper(BaseMapper):
 
     def get_embeds(self):
-        test_df = self.get_dataset(self.test_dataset, split="test")
+        test_df = self.get_dataset(dataset_name=self.test_dataset, app_name=self.app_name)
 
-        target_sublabels = test_df["sublabel1"].unique()
+        target_sublabels = test_df["sublabel"].unique()
         def sublabel_embedder(input_sublabel):
             return np.array([1 if target_sublabel==input_sublabel else 0 for target_sublabel in target_sublabels])
 

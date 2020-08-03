@@ -4,8 +4,8 @@ import pandas as pd
 import torch
 from transformers import AutoModel
 
+from data.download_util_base import DownloadUtilBase
 from utils.utils import create_dir
-
 
 class BaseMapper:
     def __init__(self, test_dataset):
@@ -34,6 +34,9 @@ class BaseMapper:
 
         # Get mapping name
         self.mapping_name = self.get_mapping_name()
+
+        # Get the misc app label (the label we give to the collection of a few bits of feedback on many apps)
+        self.misc_app_name = DownloadUtilBase().misc_app_name
 
         # Get the device that is available currently for torch training/inference
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -85,21 +88,33 @@ class BaseMapper:
 
         # Iterate over each folder in the raw data folder to find distinct datasets
         for item in os.listdir(self.raw_dataset_dir):
-            data_folder_contents = os.path.join(self.raw_dataset_dir, item)
+            all_app_data = self.get_all_app_data(item)
 
-            # We make sure that this is a folder, and hence a dataset containing app.csv files
-            if os.path.isdir(data_folder_contents):
-                # We prepare a dict for this dataset
-                all_datasets[item] = {}
-
-                # Iterate over each app in the dataset
-                for app_name in os.listdir(data_folder_contents):
-
-                    # Get the df for this dataset and app, saving it to the all_datasets dict which will contain the data for every app in every dataset
-                    all_datasets[item][app_name] = self.get_dataset(item, app_name)
+            # We only add data if the item is actually a dict of df. get_all_app_data returns None if
+            if all_app_data is not None:
+                all_datasets[item] = all_app_data
 
         # Return the df of all datasets in raw folder
         return all_datasets
+
+    def get_all_app_data(self, dataset_name):
+        data_folder_contents = os.path.join(self.raw_dataset_dir, dataset_name)
+
+        # We make sure that this is a folder, and hence a dataset containing app.csv files
+        if not os.path.isdir(data_folder_contents):
+            return None
+
+        # We prepare a dict for this dataset
+        dataset_dict = {}
+
+        # Iterate over each app in the dataset
+        for app_name in os.listdir(data_folder_contents):
+
+            # Get the df for this dataset and app, saving it to the all_datasets dict which will contain the data for every app in every dataset
+            dataset_dict[app_name] = self.get_dataset(dataset_name, app_name)
+
+        return dataset_dict
+
 
     def output_embeddings(self, embedding, df):
         # Make sure the embedding folder exists

@@ -10,15 +10,24 @@ from tqdm import tqdm
 from mapping.model_training.transformer_models import get_cls_model_and_optimizer, get_nsp_model_and_optimizer, get_weighted_adam_optimizer
 from mapping.model_training.transformer_eval import create_eval_engine
 
-from utils.utils import randomly_shuffle_list
+from utils.utils import randomly_shuffle_list, split_df
 
-def train_cls(data_dict, model_name, batch_size, max_len, device, params, training_type="cls"):
+def train_cls(data_dict, params, device, training_type="cls"):
     # Three training types are allowed:
     # Classification - taking one piece of text and classifying it given a set of labels
     # Similarity classification - given two pieces of text, classifying whether they are similar or not, in a binary fashion (E.g. next sentence prediction, duplicate issues etc.)
-    # Similarity regression - given two pieces of text, calculating the overlap of those texts
-    allowed_training_types = ["cls", "sim_cls"]#, "sim_reg"]
+    allowed_training_types = ["cls", "sim_cls"]
     assert training_type in allowed_training_types, f"Cannot train using {training_type}. Currently only {allowed_training_types} are supported."
+
+    # Get the hyperparameters for training
+    lr = params["lr"]
+    eps = params["eps"]
+    wd = params["wd"]
+    epochs = params["epochs"]
+    patience = params["patience"]
+    max_len = params["max_len"]
+    batch_size = params["batch_size"]
+    model_name = params["model_name"]
 
     # Load pre-trained model tokenizer (vocabulary)
     tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
@@ -28,16 +37,11 @@ def train_cls(data_dict, model_name, batch_size, max_len, device, params, traini
     model = model.to(device)
     model.zero_grad()
 
-    # Get the hyperparameters for training
-    lr = params["lr"]
-    eps = params["eps"]
-    wd = params["wd"]
-    epochs = params["epochs"]
-    patience = params["patience"]
-
     tasks_dict = {}
 
-    for task_name, (train_df, val_df) in data_dict.items():
+    for task_name, train_df in data_dict.items():
+        train_df, val_df = split_df(train_df)
+
         # Get the dataloader for both training and test sets
         # This dataloader holds the inputs and outputs of each observation, and batches them
         if training_type == "cls":
@@ -48,9 +52,6 @@ def train_cls(data_dict, model_name, batch_size, max_len, device, params, traini
             train_loader = get_sim_cls_dataloader(train_df, tokenizer, max_len, batch_size, is_train=True)
             val_loader = get_sim_cls_dataloader(val_df, tokenizer, max_len, batch_size, is_train=False)
             n_classes = 2
-        elif training_type == "sim_reg":
-            n_classes = 1
-            pass
         else:
             raise Exception(f"Cannot train using {training_type}. Currently only {allowed_training_types} are supported.")
 
@@ -59,8 +60,6 @@ def train_cls(data_dict, model_name, batch_size, max_len, device, params, traini
             training_model, optimizer = get_cls_model_and_optimizer(model, n_classes, lr, eps, wd, device)
         elif training_type == "sim_cls":
             training_model, optimizer = get_nsp_model_and_optimizer(model, lr, eps, wd, device)
-        elif training_type == "sim_reg":
-            pass
 
         eval_engine = create_eval_engine(training_model, device)
 
@@ -72,11 +71,12 @@ def train_cls(data_dict, model_name, batch_size, max_len, device, params, traini
                             "eval_engine": eval_engine}
 
     # Prepare the loss function
-    if training_type == "sim_reg":
-        pass
-    else:
+    if training_type in ["cls", "sim_cls"]:
         loss_fn = torch.nn.CrossEntropyLoss()
         target_metric = "average f1"
+    else:
+        # If more training types are added, add appropriate loss fn
+        pass
 
     model = train_on_datasets(tasks_dict, loss_fn, epochs, patience, device, target_metric)
 
