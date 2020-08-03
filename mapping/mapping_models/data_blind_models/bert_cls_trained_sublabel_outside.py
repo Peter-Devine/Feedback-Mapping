@@ -53,8 +53,8 @@ class BertClsTrainedSublabelOutsideMapper(BaseMapper):
             "lr": 5e-5,
             "eps": 1e-6,
             "wd": 0.01,
-            "epochs": 1,
-            "patience": 2
+            "epochs": 5,
+            "patience": 1
         }
 
         model = train_cls(train_datasets, self.model_name, self.batch_size, self.max_length, self.device, params)
