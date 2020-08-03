@@ -16,6 +16,10 @@ class BaseMapper:
         self.raw_dataset_dir = os.path.join(self.overall_dataset_dir, "raw")
         assert os.path.exists(self.raw_dataset_dir), f"No raw datasets in the {self.raw_dataset_dir} path. Run data downloaders first."
 
+        # Raw dir - the umbrella folder where we keep our initially downloaded data here
+        self.raw_dataset_specific_dir = os.path.join(self.raw_dataset_dir, self.test_dataset)
+        assert os.path.exists(self.raw_dataset_specific_dir), f"No raw datasets in the {self.raw_dataset_specific_dir} path. Run data downloaders first."
+
         # Output dir - We keep our embeddings here
         self.output_dataset_dir = os.path.join(self.overall_dataset_dir, "embeddings")
         create_dir(self.output_dataset_dir)
@@ -116,10 +120,12 @@ class BaseMapper:
         embedding_df.to_csv(app_embedding_file)
 
     def embed(self):
-        print(f"Now embedding all apps in {self.test_dataset} using {self.mapping_name}")
+        print(f"Now starting embedding all apps in {self.test_dataset} using {self.mapping_name}")
 
         # Iterate over each folder in the dataset to find all apps within it
         for app_file_name in os.listdir(self.raw_dataset_specific_dir):
+            print(f"Now trying to get embeds for {app_file_name} in {self.test_dataset} using {self.mapping_name}")
+
             assert app_file_name[-4:] == ".csv", f"{app_file_name} file found in {self.raw_dataset_specific_dir} is not .csv. Please delete to run embedding on {self.test_dataset}"
 
             # Get the app name sans suffix. Save it as an attribute
