@@ -2,7 +2,7 @@ from mapping.mapping_models.data_fit_models.classical_models.lda import LdaMappe
 from mapping.mapping_models.data_fit_models.classical_models.lda_small import LdaSmallMapper
 from mapping.mapping_models.data_fit_models.classical_models.tfidf_pca import TfidfPcaMapper
 from mapping.mapping_models.data_fit_models.classical_models.tfidf_pca_small import TfidfPcaSmallMapper
-from mapping.mapping_models.data_fit_models.nsp_lm.bert_nsp_cos_trained_mtl import BertNspCosTrainMtlMapper
+from mapping.mapping_models.data_fit_models.nsp_lm.bert_nsp_cos_trained_mtl import BertNspCosTrainedMtlMapper
 
 MAPPER_DICT = {
     # Data fit classical models
@@ -10,7 +10,7 @@ MAPPER_DICT = {
     "tfidf_pca_small": TfidfPcaSmallMapper,
     "lda": LdaMapper,
     "lda_small": LdaSmallMapper,
-    "bert_nsp_cos_trained_mtl": BertNspCosTrainMtlMapper,
+    "bert_nsp_cos_trained_mtl": BertNspCosTrainedMtlMapper,
 }
 
 def map_data(list_of_datasets, list_of_mappings):

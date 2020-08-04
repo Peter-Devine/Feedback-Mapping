@@ -7,7 +7,7 @@ from mapping.model_training.training_data_utils import get_next_sentence_df
 from mapping.model_training.transformer_training_nsp_cos import train_nsp_cos
 from utils.bert_utils import get_lm_embeddings
 
-class BertNspCosTrainMtlMapper(BaseMapper):
+class BertNspCosTrainedMtlMapper(BaseMapper):
 
     def get_embeds(self):
         test_df = self.get_dataset(dataset_name=self.test_dataset, app_name=self.app_name)
@@ -83,7 +83,7 @@ class BertNspCosTrainMtlMapper(BaseMapper):
         self.save_preprocessed_df(nsp_train_df, f"{self.test_dataset}_{self.app_name}")
 
         # Get this df into a format that the training expects it to be in (a dict with the key as the task name and the value as the training data)
-        mtl_format_dataset = {"all_datasets": nsp_train_df}
+        mtl_format_dataset = {"nsp_dataset": nsp_train_df}
 
         return mtl_format_dataset
 
