@@ -22,6 +22,7 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
         self.model_name = 'bert-base-uncased'
         self.max_length = 128
         self.batch_size = 64
+        self.eval_batch_size = 128
         self.lr = 5e-5
         self.eps = 1e-6
         self.wd = 0.01

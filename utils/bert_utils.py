@@ -27,7 +27,7 @@ def get_lm_embeddings(mapper_model, test_df, trained_model_name):
     embeddings = []
 
     # Batch tensor so we can iterate over inputs
-    test_loader = torch.utils.data.DataLoader(tokens_tensor, batch_size=mapper_model.batch_size, shuffle=False)
+    test_loader = torch.utils.data.DataLoader(tokens_tensor, batch_size=mapper_model.eval_batch_size, shuffle=False)
 
     # Make sure the torch algorithm runs without gradients (as we aren't training)
     with torch.no_grad():
