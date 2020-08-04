@@ -115,7 +115,6 @@ class BaseMapper:
 
         return dataset_dict
 
-
     def output_embeddings(self, embedding, df):
         # Make sure the embedding folder exists
         dataset_embedding_folder = os.path.join(self.output_dataset_dir, self.test_dataset)

@@ -19,9 +19,13 @@ def get_random_seed():
 def set_random_seed(seed_value):
     os.environ[seed_env_var_name] = str(seed_value)
 
-def randomly_shuffle_list(list):
+def randomly_shuffle_list(input_list):
     random.seed(a=get_random_seed())
-    random.shuffle(list)
+    random.shuffle(input_list)
+
+def randomly_sample_list(input_list, k=1):
+    random.seed(a=get_random_seed())
+    return random.sample(input_list, k=1)
 
 def split_df(df, split_frac=0.7):
     train_df = df.sample(frac=split_frac, random_state=get_random_seed())

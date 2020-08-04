@@ -2,7 +2,12 @@ from transformers import AutoModel,  AdamW
 from torch import nn
 import torch
 
-def get_weighted_adam_optimizer(model, lr, eps, wd):
+# Returns an optimizer that is fit to the supplied model, with the given learning rate, epsilon and weight decay parameters.
+def get_weighted_adam_optimizer(model, params):
+    lr = params["lr"]
+    eps = params["eps"]
+    wd = params["wd"]
+
     no_decay = ["bias", "LayerNorm.weight"]
 
     optimizer_grouped_parameters = [
@@ -19,7 +24,8 @@ def get_weighted_adam_optimizer(model, lr, eps, wd):
 
     return optimizer
 
-def get_cls_model_and_optimizer(language_model, n_classes, lr, eps, wd, device):
+# Returns a model which classifies one piece of text using the supplied language model and predicts over n_classes
+def get_cls_model_and_optimizer(language_model, n_classes, params, device):
 
     class ClassificationLanguageModel(nn.Module):
       def __init__(self, lang_model, n_classes):
@@ -38,11 +44,13 @@ def get_cls_model_and_optimizer(language_model, n_classes, lr, eps, wd, device):
 
     cls_lm = cls_lm.to(device)
 
-    optimizer = get_weighted_adam_optimizer(cls_lm, lr=lr, eps=eps, wd=wd)
+    optimizer = get_weighted_adam_optimizer(cls_lm, params)
 
     return cls_lm, optimizer
 
-def get_nsp_model_and_optimizer(language_model, lr, eps, wd, device):
+# Returns a model which embeds two pieces of text, and then finds the cosine similarity of these embeddings.
+# This returns a binary similarity score for each pair of text.
+def get_nsp_model_and_optimizer(language_model, params, device):
 
     class NextSentenceLanguageModel(nn.Module):
       def __init__(self, lang_model):
@@ -70,6 +78,6 @@ def get_nsp_model_and_optimizer(language_model, lr, eps, wd, device):
 
     nsp_lm = nsp_lm.to(device)
 
-    optimizer = get_weighted_adam_optimizer(nsp_lm, lr=lr, eps=eps, wd=wd)
+    optimizer = get_weighted_adam_optimizer(nsp_lm, params)
 
     return nsp_lm, optimizer

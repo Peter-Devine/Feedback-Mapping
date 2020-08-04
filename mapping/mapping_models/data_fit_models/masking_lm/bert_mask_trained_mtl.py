@@ -1,17 +1,12 @@
 import os
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
-from mapping.model_training.transformer_training_cls import train_cls
 from utils.bert_utils import get_lm_embeddings
 
-class BertClsTrainedSublabelMtlMapper(BaseMapper):
+class BertMaskTrainedMtlMapper(BaseMapper):
 
     def get_embeds(self):
         test_df = self.get_dataset(dataset_name=self.test_dataset, app_name=self.app_name)
-
-        # Some datasets do not have metadata. Therefore, we skip these datasets
-        if "sublabel" not in test_df.columns:
-            return None
 
         all_embeddings = get_lm_embeddings(self, test_df, f"{self.get_mapping_name()}")
 
@@ -26,7 +21,6 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
         self.wd = 0.01
         self.epochs = 30
         self.patience = 1
-        self.training_col = "sublabel"
 
     def get_model(self):
         model_path = os.path.join(self.model_dir, self.get_model_name())
@@ -44,7 +38,7 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
     def train_model(self, model_path):
         train_dfs = self.get_training_data()
 
-        mtl_datasets = self.prepare_train_tasks_dataset(train_dfs)
+        combined_df = self.prepare_train_tasks_dataset(train_dfs)
 
         params = {
             "lr": self.lr,
@@ -62,29 +56,23 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
         torch.save(model.state_dict(), model_path)
 
     def prepare_train_tasks_dataset(self, train_dfs_dict):
-        mtl_datasets = {}
+        # Combine all app data for all datasets into a single df
+        combined_df = None
 
         for dataset_name in train_dfs_dict.keys():
-            # Get the dfs for a given dataset
+            # Get the df for a given dataset
             app_train_dfs_dict = train_dfs_dict[dataset_name]
 
-            # Combine all app data for one dataset into a single df
-            train_df = None
             for app_name, app_df in app_train_dfs_dict.items():
-                if train_df is None:
-                    train_df = app_df
+                if combined_df is None:
+                    combined_df = app_df
                 else:
-                    train_df = train_df.append(app_df).reset_index(drop=True)
+                    combined_df = combined_df.append(app_df).reset_index(drop=True)
 
-            # Train the classifier model to predict sublabel
-            train_df["label"] = train_df[self.training_col]
+        # Save this df for debugging purposes
+        self.save_preprocessed_df(combined_df, f"{dataset_name}_{self.app_name}")
 
-            mtl_datasets[dataset_name] = train_df
-
-            # Save this df for debugging purposes
-            self.save_preprocessed_df(train_df, f"{dataset_name}_{self.app_name}")
-
-        return mtl_datasets
+        return combined_df
 
     def get_mapping_name(self):
-        return f"bert_cls_trained_sublabel_mtl"
+        return f"bert_mask_trained_mtl"
