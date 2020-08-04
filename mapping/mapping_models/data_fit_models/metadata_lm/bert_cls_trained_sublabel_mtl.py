@@ -1,4 +1,5 @@
 import os
+import torch
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
 from mapping.model_training.transformer_training_cls import train_cls

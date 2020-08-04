@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import torch
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
 from mapping.model_training.training_data_utils import get_next_sentence_df
