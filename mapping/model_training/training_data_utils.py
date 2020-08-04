@@ -71,7 +71,7 @@ def get_split(row, is_one_sentence=False):
         return get_split(row, is_one_sentence=True)
 
     # Get one split, randomly selected from the possible random splits
-    random_split = randomly_sample_list(possible_splits, k=1)
+    random_split = randomly_sample_list(possible_splits, k=1)[0]
 
     return random_split
 
@@ -104,7 +104,7 @@ def get_next_sentence_df(df):
     matched_df = get_two_text_df(all_split_df)
 
     # Randomly split the dataset into two
-    first_split_df, second_split_df = split_df(matched_df, split_frac=0.5)
+    first_split_df, second_split_df = split_df(matched_df, split_frac=0.5, has_labels=False)
 
     # Get both sides of the split, and randomly shuffle one of them so that they are no longer paired with paired text
     unmatched_df = get_shuffled_second_text(second_split_df)

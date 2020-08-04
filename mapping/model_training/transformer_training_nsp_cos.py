@@ -52,7 +52,7 @@ def train_nsp_cos(data_dict, params, device):
 
 def get_sim_cls_dataloader(df, tokenizer, params, is_train):
     # Creates a dataloader for all similarity classification (similar/not similar binary classification) datasets
-    max_len = params["max_len"]
+    max_len = params["max_length"]
     batch_size = params["batch_size"]
 
     # Tokenize and convert to input IDs

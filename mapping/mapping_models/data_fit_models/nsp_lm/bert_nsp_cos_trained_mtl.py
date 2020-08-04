@@ -1,6 +1,8 @@
 import os
+import pandas as pd
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
+from mapping.model_training.training_data_utils import get_next_sentence_df
 from mapping.model_training.transformer_training_nsp_cos import train_nsp_cos
 from utils.bert_utils import get_lm_embeddings
 
@@ -76,7 +78,7 @@ class BertNspCosTrainMtlMapper(BaseMapper):
         nsp_train_df = get_next_sentence_df(all_train_df)
 
         # Save this df for debugging purposes
-        self.save_preprocessed_df(nsp_train_df, f"{dataset_name}_{self.app_name}")
+        self.save_preprocessed_df(nsp_train_df, f"{self.test_dataset}_{self.app_name}")
 
         # Get this df into a format that the training expects it to be in (a dict with the key as the task name and the value as the training data)
         mtl_format_dataset = {"all_datasets": nsp_train_df}

@@ -27,13 +27,14 @@ def randomly_sample_list(input_list, k=1):
     random.seed(a=get_random_seed())
     return random.sample(input_list, k=1)
 
-def split_df(df, split_frac=0.7):
+def split_df(df, split_frac=0.7, has_labels=True):
     train_df = df.sample(frac=split_frac, random_state=get_random_seed())
     valid_df = df.drop(train_df.index)
 
-    # Make sure that the validation set does not have labels that were not included in train
-    valid_df_labels = train_df.label.unique()
-    valid_df = valid_df[valid_df.label.isin(valid_df_labels)]
+    if has_labels:
+        # Make sure that the validation set does not have labels that were not included in train
+        valid_df_labels = train_df.label.unique()
+        valid_df = valid_df[valid_df.label.isin(valid_df_labels)]
 
     return train_df, valid_df
 

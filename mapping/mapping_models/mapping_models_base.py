@@ -109,6 +109,9 @@ class BaseMapper:
 
         # Iterate over each app in the dataset
         for app_name in os.listdir(data_folder_contents):
+            # Make sure that this dataset is a csv file, and then strip the file suffix from the app_name
+            assert app_name[-4:] == ".csv", f"Non-csv file ({app_name}) found in {data_folder_contents}"
+            app_name = app_name[:-4]
 
             # Get the df for this dataset and app, saving it to the all_datasets dict which will contain the data for every app in every dataset
             dataset_dict[app_name] = self.get_dataset(dataset_name, app_name)

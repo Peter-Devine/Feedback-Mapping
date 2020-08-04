@@ -3,7 +3,7 @@ import numpy as np
 
 from mapping.model_training.transformer_models import get_cls_model_and_optimizer
 from mapping.model_training.transformer_eval import create_eval_engine
-from mapping.model_training.transformer_training_utils import get_inputs, train_on_mtl_datasets, get_lm_and_tok
+from mapping.model_training.transformer_training_utils import get_inputs, get_labels, train_on_mtl_datasets, get_lm_and_tok
 
 from utils.utils import split_df
 
@@ -52,7 +52,7 @@ def train_cls(data_dict, params, device):
 
 def get_cls_dataloader(df, tokenizer, params, is_train, label_dict=None):
     # Creates a dataloader for all classification datasets
-    max_len = params["max_len"]
+    max_len = params["max_length"]
     batch_size = params["batch_size"]
 
     # Tokenize and convert to input IDs

@@ -10,7 +10,7 @@ class SublabelNaiveMapper(BaseMapper):
         def sublabel_embedder(input_sublabel):
             return np.array([1 if target_sublabel==input_sublabel else 0 for target_sublabel in target_sublabels])
 
-        all_embeddings = test_df.sublabel1.apply(sublabel_embedder).values
+        all_embeddings = test_df.sublabel.apply(sublabel_embedder).values
 
         all_embeddings = np.stack(all_embeddings)
 
