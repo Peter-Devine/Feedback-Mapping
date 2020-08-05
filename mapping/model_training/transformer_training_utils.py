@@ -11,7 +11,7 @@ from utils.utils import randomly_shuffle_list
 
 def get_lm_and_tok(model_name, device):
     # Load pre-trained model tokenizer (vocabulary)
-    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+    tokenizer = get_tokenizer(model_name)
 
     # Load the BERT model
     model = AutoModel.from_pretrained(model_name)
@@ -19,6 +19,12 @@ def get_lm_and_tok(model_name, device):
     model.zero_grad()
 
     return model, tokenizer
+
+def get_tokenizer(model_name):
+    # Get the Huggingface tokenizer for the model of the name supplied
+    # Load pre-trained model tokenizer (vocabulary)
+    tokenizer = AutoTokenizer.from_pretrained(model_name, use_fast=True)
+    return tokenizer
 
 # Turns the text series into a PyTorch tensor
 def get_inputs(text_series, tokenizer, max_length):

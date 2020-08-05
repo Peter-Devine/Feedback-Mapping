@@ -1,4 +1,4 @@
-from transformers import AutoModel,  AdamW
+from transformers import AutoModel,  AdamW, AutoModelForMaskedLM
 from torch import nn
 import torch
 
@@ -81,3 +81,16 @@ def get_nsp_model_and_optimizer(language_model, params, device):
     optimizer = get_weighted_adam_optimizer(nsp_lm, params)
 
     return nsp_lm, optimizer
+
+# Returns a model which is trained on masking words in data
+def get_masking_model_and_optimizer(params, device):
+
+    model_name = params["model_name"]
+
+    masking_model = AutoModelForMaskedLM.from_pretrained(model_name)
+
+    masking_model = masking_model.to(device)
+
+    optimizer = get_weighted_adam_optimizer(masking_model, params)
+
+    return masking_model, optimizer
