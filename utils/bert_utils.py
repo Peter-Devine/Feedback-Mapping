@@ -32,9 +32,9 @@ def get_lm_embeddings(mapper_model, test_df, trained_model_name):
     # Make sure the torch algorithm runs without gradients (as we aren't training)
     with torch.no_grad():
         print(f"Iterating over inputs {trained_model_name}")
-        # Iterate over all batches, passing the batches through the
+        # Iterate over all batches, passing the batches through the test set
         for test_batch in tqdm(test_loader):
-            # See the models docstrings for the detail of the inputs
+            # Get the model output from the test set
             outputs = model(test_batch.to(mapper_model.device))
             # Output the final average encoding across all characters as a numpy array
             np_array = outputs[0].mean(dim=1).cpu().numpy()
