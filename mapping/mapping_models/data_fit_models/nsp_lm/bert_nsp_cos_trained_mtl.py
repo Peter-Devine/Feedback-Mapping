@@ -6,6 +6,7 @@ from mapping.mapping_models.mapping_models_base import BaseMapper
 from mapping.model_training.training_data_utils import get_next_sentence_df
 from mapping.model_training.transformer_training_nsp_cos import train_nsp_cos
 from utils.bert_utils import get_lm_embeddings
+from utils.utils import get_all_dataset_combined_text
 
 class BertNspCosTrainedMtlMapper(BaseMapper):
 
@@ -39,21 +40,12 @@ class BertNspCosTrainedMtlMapper(BaseMapper):
 
     def get_training_data(self):
         # Create an appended series of text from all dfs from all datasets and apps
-        all_dataset_series = None
 
         all_dataset_dict = self.get_all_datasets()
-        # Iterate over each dataset
-        for dataset, dataset_dict in all_dataset_dict.items():
-            # Iterate over each app in dataset
-            for app, app_df in dataset_dict.items():
 
-                # Append data to all_dataset_series
-                if all_dataset_series is None:
-                    all_dataset_series = app_df.text
-                else:
-                    all_dataset_series = all_dataset_series.append(app_df.text).reset_index(drop=True)
+        all_dataset_text_series = get_all_dataset_combined_text(all_dataset_dict)
 
-        return pd.DataFrame({"text": all_dataset_series})
+        return pd.DataFrame({"text": all_dataset_text_series})
 
     def train_model(self, model_path):
         train_df = self.get_training_data()

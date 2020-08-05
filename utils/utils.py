@@ -38,5 +38,29 @@ def split_df(df, split_frac=0.7, has_labels=True):
 
     return train_df, valid_df
 
+# Takes a dict of dfs ({"A": df1, "B": df2}), and appends them like df1.append(df2)
+def combine_dict_of_dfs_text(dict_of_dfs):
+    combined_df = None
+    for key, df in dict_of_dfs.items():
+        if combined_df is None:
+            combined_df = df["text"]
+        else:
+            combined_df = combined_df.append(df["text"]).reset_index(drop=True)
+    return combined_df
+
+# Takes a dict of dicts of dfs {"Task1": {"AppA": df1, "AppB": df2}}, and returns a combined df of their texts
+def get_all_dataset_combined_text(all_dataset_dict):
+    combined_df = None
+
+    for dataset_name, dataset_dict in all_dataset_dict.items():
+        dataset_df = combine_dict_of_dfs_text(dataset_dict)
+
+        if combined_df is None:
+            combined_df = dataset_df
+        else:
+            combined_df = combined_df.append(dataset_df).reset_index(drop=True)
+
+    return combined_df
+
 def bad_char_del(text):
      return text.replace("\n", " ").replace("\r", " ").replace("\t", " ")
