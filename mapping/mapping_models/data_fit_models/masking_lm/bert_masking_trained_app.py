@@ -3,7 +3,7 @@ import pandas as pd
 from mapping.mapping_models.data_fit_models.masking_lm.bert_masking_trained_mtl import BertMaskingTrainedMtlMapper
 from utils.utils import combine_dict_of_dfs_text
 
-class BertMaskingTrainedDatasetMapper(BertMaskingTrainedMtlMapper):
+class BertMaskingTrainedAppMapper(BertMaskingTrainedMtlMapper):
 
     def get_model_name(self):
         return f"{self.test_dataset}_{self.app_name}.pt"

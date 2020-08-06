@@ -6,6 +6,10 @@ class SublabelNaiveMapper(BaseMapper):
     def get_embeds(self):
         test_df = self.get_dataset(dataset_name=self.test_dataset, app_name=self.app_name)
 
+        # If the dataset does not have any sublabels, then we cannot embed upon it, so we skip this dataset
+        if "sublabel" not in test_df.columns:
+            return None
+
         target_sublabels = test_df["sublabel"].unique()
         def sublabel_embedder(input_sublabel):
             return np.array([1 if target_sublabel==input_sublabel else 0 for target_sublabel in target_sublabels])

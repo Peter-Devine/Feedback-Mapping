@@ -1,4 +1,4 @@
-from mapping.mapping_models.data_blind_models.bert_vanilla import BertVanillaMapper
+from mapping.mapping_models.data_blind_models.bert_likes.bert_vanilla import BertVanillaMapper
 
 class RobertaVanillaLargeMapper(BertVanillaMapper):
 

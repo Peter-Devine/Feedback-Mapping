@@ -6,7 +6,7 @@ class KeywordMatchingMapper(BaseMapper):
     def get_embeds(self):
         test_df = self.get_dataset(dataset_name=self.test_dataset, app_name=self.app_name)
 
-        keywords = ["bug", "crash", "feature", "app", "great", "new", "freeze"]
+        keywords = ["bug", "crash", "feature", "app", "great", "new", "freeze", "free", "good"]
         def keyword_embedder(text):
             return np.array([1 if keyword in text.lower() else 0 for keyword in keywords])
 
