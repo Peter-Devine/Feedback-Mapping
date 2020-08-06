@@ -5,7 +5,7 @@ from utils.bert_utils import get_lm_embeddings
 class BertVanillaMapper(BaseMapper):
 
     def get_embeds(self):
-        test_df = self.get_dataset(self.test_dataset, split="test")
+        test_df = self.get_dataset(dataset_name=self.test_dataset, app_name=self.app_name)
 
         all_embeddings = get_lm_embeddings(self, test_df, f"{self.get_mapping_name()}")
 
