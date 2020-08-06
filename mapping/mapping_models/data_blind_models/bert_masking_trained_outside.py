@@ -1,8 +1,8 @@
 import pandas as pd
 
-from mapping.mapping_models.data_fit_models.metadata_lm.bert_cls_trained_sublabel_mtl import BertClsTrainedSublabelMtlMapper
+from mapping.mapping_models.data_fit_models.masking_lm.bert_masking_trained_mtl import BertMaskingTrainedMtlMapper
 
-class BertClsTrainedSublabelOutsideMapper(BertClsTrainedSublabelMtlMapper):
+class BertMaskingTrainedOutsideMapper(BertMaskingTrainedMtlMapper):
 
     def get_model_name(self):
         return "outside.pt"
@@ -12,7 +12,7 @@ class BertClsTrainedSublabelOutsideMapper(BertClsTrainedSublabelMtlMapper):
         df = pd.read_csv("https://raw.githubusercontent.com/sealuzh/user_quality/master/csv_files/reviews.csv", index_col=0)
         df = df.rename({"review": "text", "star": "sublabel"})
 
-        return {"outside_dataset": {"MISC_APP": df}}
+        return df
 
     def get_mapping_name(self):
-        return f"bert_cls_trained_sublabel_outside"
+        return f"bert_masking_trained_outside"
