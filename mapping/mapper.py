@@ -114,7 +114,7 @@ MAPPER_DICT = {
 def map_data(list_of_datasets, list_of_mappings):
     # If no mapping specified, run all
     if len(list_of_mappings) < 1:
-        list_of_mappings = MAPPER_DICT.keys()
+        list_of_mappings = list(MAPPER_DICT.keys())
 
         # Remove the mappings that cannot be run on most datasets / don't play well with other mappings (USE and TF2.0 take all the memory away from PyTorch)
         list_of_mappings.remove("use")

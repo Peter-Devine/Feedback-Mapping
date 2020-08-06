@@ -30,6 +30,13 @@ def get_tokenizer(model_name):
 def get_inputs(text_series, tokenizer, max_length):
     return tokenizer.batch_encode_plus(list(text_series.values), max_length = max_length, pad_to_max_length=True, truncation=True, return_tensors="pt")["input_ids"]
 
+# Take a series of labels, and make them a torch tensor of integers. Also output how these string labels are mapped to integers.
+def get_labels(labels, label_dict=None):
+    if label_dict is None:
+        label_dict = {label: i for i, label in enumerate(labels.unique())}
+    int_labels = labels.apply(lambda x: label_dict[x])
+    return torch.LongTensor(np.stack(int_labels.values)), label_dict
+
 # Takes a dictionary of tasks, and returns a list of task names proportional to the data size of each task, shufffled.
 # E.g. ["TaskB", "TaskB", "TaskA", "TaskC", "TaskB", "TaskC"] where TaskA has 1 batch of data, TaskB has 3 batches of data, and Task C has 2 batches of data
 def get_mtl_task_order(tasks_dict):
