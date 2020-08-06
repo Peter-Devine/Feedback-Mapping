@@ -3,6 +3,7 @@ from mapping.mapping_models.data_fit_models.classical_models.lda_small import Ld
 from mapping.mapping_models.data_fit_models.classical_models.tfidf_pca import TfidfPcaMapper
 from mapping.mapping_models.data_fit_models.classical_models.tfidf_pca_small import TfidfPcaSmallMapper
 from mapping.mapping_models.data_fit_models.nsp_lm.bert_nsp_cos_trained_mtl import BertNspCosTrainedMtlMapper
+from mapping.mapping_models.data_fit_models.nsp_lm.bert_nsp_trained_mtl import BertNspTrainedMtlMapper
 from mapping.mapping_models.data_fit_models.masking_lm.bert_masking_trained_mtl import BertMaskingTrainedMtlMapper
 
 MAPPER_DICT = {
@@ -12,6 +13,7 @@ MAPPER_DICT = {
     "lda": LdaMapper,
     "lda_small": LdaSmallMapper,
     "bert_nsp_cos_trained_mtl": BertNspCosTrainedMtlMapper,
+    "bert_nsp_trained_mtl": BertNspTrainedMtlMapper,
     "bert_masking_trained_mtl": BertMaskingTrainedMtlMapper,
 }
 

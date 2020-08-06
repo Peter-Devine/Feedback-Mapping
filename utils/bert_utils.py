@@ -3,7 +3,7 @@ import numpy as np
 from transformers import AutoTokenizer
 from tqdm import tqdm
 
-def get_lm_embeddings(mapper_model, test_df, trained_model_name):
+def get_lm_embeddings(mapper_model, test_df, trained_model_name, use_first_token_only = False):
     mapper_model.set_parameters()
 
     # Load pre-trained model tokenizer (vocabulary)
@@ -36,8 +36,14 @@ def get_lm_embeddings(mapper_model, test_df, trained_model_name):
         for test_batch in tqdm(test_loader):
             # Get the model output from the test set
             outputs = model(test_batch.to(mapper_model.device))
-            # Output the final average encoding across all characters as a numpy array
-            np_array = outputs[0].mean(dim=1).cpu().numpy()
+
+            if use_first_token_only:
+                # Output only the model output from the first token position (I.e. the position that BERT NSP is trained on)
+                np_array = outputs[0][:,0,:].cpu().numpy()
+            else:
+                # Output the final average encoding across all characters as a numpy array
+                np_array = outputs[0].mean(dim=1).cpu().numpy()
+
             # Append this encoding to a list
             embeddings.append(np_array)
 
