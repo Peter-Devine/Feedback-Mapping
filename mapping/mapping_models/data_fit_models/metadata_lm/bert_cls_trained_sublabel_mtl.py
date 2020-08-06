@@ -10,10 +10,6 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
     def get_embeds(self):
         test_df = self.get_dataset(dataset_name=self.test_dataset, app_name=self.app_name)
 
-        # Some datasets do not have metadata. Therefore, we skip these datasets
-        if "sublabel" not in test_df.columns:
-            return None
-
         all_embeddings = get_lm_embeddings(self, test_df, f"{self.get_mapping_name()}")
 
         return all_embeddings, test_df
@@ -73,6 +69,11 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
             # Combine all app data for one dataset into a single df
             train_df = None
             for app_name, app_df in app_train_dfs_dict.items():
+
+                # We skip any datasets that do not have the columns that we are looking to train on
+                if self.training_col not in app_df.columns:
+                    continue
+
                 if train_df is None:
                     train_df = app_df
                 else:

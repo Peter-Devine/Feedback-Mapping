@@ -1,14 +1,7 @@
-from mapping.mapping_models.data_fit_models.metadata_lm.bert_cls_trained_sublabel_mtl import BertClsTrainedSublabelMtlMapper
+from mapping.mapping_models.data_fit_models.metadata_lm.bert_cls_trained_sublabel_dataset import BertClsTrainedSublabelDatasetMapper
 
-class BertClsTrainedSublabelAppMapper(BertClsTrainedSublabelMtlMapper):
+class BertClsTrainedSublabelAppMapper(BertClsTrainedSublabelDatasetMapper):
     # Since the app training task is just a subset of the MTL task (but only with one task - with one app in that one task), we simply extend the MTL class, and change the data provided to it.
-
-    def get_embeds(self):
-        # Only run embedding if app is not MISC_APP. MISC_APP is a mixture of lots of feedback from many reviews, but not enough to train an ML model for any individual one. Evaluating over MISC_APP is meaningless.
-        if self.app_name == self.misc_app_name:
-            return None
-        else:
-            return super().get_embeds()
 
     def get_model_name(self):
         # Save each datasets model individually
