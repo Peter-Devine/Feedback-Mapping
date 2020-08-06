@@ -14,7 +14,7 @@ from mapping.mapping_models.mapping_models_base import BaseMapper
 class SBertWKMapper(BaseMapper):
 
     def get_embeds(self):
-        df = self.get_dataset(self.test_dataset, split="test")
+        df = self.get_dataset(dataset_name=self.test_dataset, app_name=self.app_name)
 
         # Get embeddings from text series
         embeddings = self.get_sentence_embeds(df.text.values)

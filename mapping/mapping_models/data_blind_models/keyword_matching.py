@@ -4,7 +4,7 @@ from mapping.mapping_models.mapping_models_base import BaseMapper
 class KeywordMatchingMapper(BaseMapper):
 
     def get_embeds(self):
-        test_df = self.get_dataset(self.test_dataset, split="test")
+        test_df = self.get_dataset(dataset_name=self.test_dataset, app_name=self.app_name)
 
         keywords = ["bug", "crash", "feature", "app", "great", "new", "freeze"]
         def keyword_embedder(text):
