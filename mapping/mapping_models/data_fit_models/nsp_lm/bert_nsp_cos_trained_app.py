@@ -3,13 +3,6 @@ from mapping.mapping_models.data_fit_models.nsp_lm.bert_nsp_cos_trained_mtl impo
 
 class BertNspCosTrainedAppMapper(BertNspCosTrainedMtlMapper):
 
-    def get_embeds(self):
-        # Only run embedding if app is not MISC_APP. MISC_APP is a mixture of lots of feedback from many reviews, but not enough to train an ML model for any individual one. Evaluating over MISC_APP alone is meaningless.
-        if self.app_name == self.misc_app_name:
-            return None
-        else:
-            return super().get_embeds()
-
     def get_model_name(self):
         return f"{self.test_dataset}_{self.app_name}.pt"
 
