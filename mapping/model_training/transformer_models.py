@@ -1,4 +1,4 @@
-from transformers import AutoModel,  AdamW, AutoModelForMaskedLM
+from transformers import AutoModel,  AdamW, AutoModelForMaskedLM, BertForNextSentencePrediction
 from torch import nn
 import torch
 
@@ -50,7 +50,7 @@ def get_cls_model_and_optimizer(language_model, n_classes, params, device):
 
 # Returns a model which embeds two pieces of text, and then finds the cosine similarity of these embeddings.
 # This returns a binary similarity score for each pair of text.
-def get_nsp_model_and_optimizer(language_model, params, device):
+def get_nsp_cos_model_and_optimizer(language_model, params, device):
 
     class NextSentenceLanguageModel(nn.Module):
       def __init__(self, lang_model):
@@ -94,3 +94,18 @@ def get_masking_model_and_optimizer(params, device):
     optimizer = get_weighted_adam_optimizer(masking_model, params)
 
     return masking_model, optimizer
+
+# Returns a model which is trained on predicting the next sentence
+def get_nsp_model_and_optimizer(params, device):
+
+    model_name = params["model_name"]
+
+    assert model_name[:4] == "bert", f"Non-BERT models not supported for NSP. Supplied model name was {model_name}"
+    
+    nsp_model = BertForNextSentencePrediction.from_pretrained(model_name)
+
+    nsp_model = nsp_model.to(device)
+
+    optimizer = get_weighted_adam_optimizer(nsp_model, params)
+
+    return nsp_model, optimizer

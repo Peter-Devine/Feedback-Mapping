@@ -26,7 +26,7 @@ def train_nsp_cos(data_dict, params, device):
         n_classes = 2
 
         # Prepare the model and optimizer
-        training_model, optimizer = get_nsp_model_and_optimizer(model, params, device)
+        training_model, optimizer = get_nsp_cos_model_and_optimizer(model, params, device)
 
         # Get the eval engine for this task
         eval_engine = create_eval_engine(training_model, device)
