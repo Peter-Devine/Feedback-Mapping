@@ -19,7 +19,7 @@ class BertVanillaMapper(BaseMapper):
     def set_parameters(self):
         self.model_name = 'bert-base-uncased'
         self.max_length = 128
-        self.batch_size = 64
+        self.eval_batch_size = 128
 
     def get_mapping_name(self):
         return "bert_vanilla"
