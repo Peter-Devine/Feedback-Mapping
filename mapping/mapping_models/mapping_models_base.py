@@ -148,12 +148,21 @@ class BaseMapper:
             # Get the app name sans suffix. Save it as an attribute
             self.app_name = app_file_name[:-4]
 
-            # Run the embedding for this app
             embedding_data = self.get_embeds()
 
-            # If the embedding_data is None, which happens when a MISC_APP.csv dataset gets used on an app specific mapper, we simply skip over it.
-            if embedding_data is None:
-                print(f"Skipping embedding {self.test_dataset} ({self.app_name}) on {self.mapping_name}")
+            # If the app is MISC_APP, then this is just a collection of many apps.
+            # Embedding based on these apps is useless, as a developer doesn't derive any real use from successfully embedding bug reports from two different apps close to each other, for example.
+            # Thus, we only do embeddings for app datasets with only one app in them.
+            if self.app_name == self.misc_app_name:
+                print(f"Skipping embedding {self.test_dataset} ({self.app_name}) on {self.mapping_name} due to MISC APP")
+                continue
+            elif embedding_data is None:
+                # When the output of get_embeds() is None, it means that this embedding cannot be done on this dataset.
+                # This might be due to the dataset not having the correct data to successfully train it.
+                # For example, some datasets do not contain any sublabel data (E.g. Jha et al.) so we cannot train on this data
+                print(f"Skipping embedding {self.test_dataset} ({self.app_name}) on {self.mapping_name} due to embedding_data being None")
+                continue
             else:
+                # Run the embedding for this app
                 embeddings, labels = embedding_data
                 self.output_embeddings(embeddings, labels)

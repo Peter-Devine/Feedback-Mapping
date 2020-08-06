@@ -5,6 +5,7 @@ import torch
 from mapping.mapping_models.mapping_models_base import BaseMapper
 from mapping.model_training.transformer_training_mask import train_mask
 from utils.bert_utils import get_lm_embeddings
+from utils.utils import get_all_dataset_combined_text
 
 class BertMaskingTrainedMtlMapper(BaseMapper):
 
@@ -60,7 +61,7 @@ class BertMaskingTrainedMtlMapper(BaseMapper):
             "batch_size": self.batch_size,
         }
 
-        model = train_mask(train_df, params, self.device):
+        model = train_mask(train_df, params, self.device)
 
         torch.save(model.state_dict(), model_path)
 

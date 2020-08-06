@@ -49,7 +49,7 @@ def get_masking_dataloader(df, tokenizer, params, is_train):
 
     data_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X), batch_size=batch_size, shuffle=is_train)
 
-    return data_loader, label_dict
+    return data_loader
 
 def train_masking_model(model, train_dl, val_dl, optim, device, params):
     # Get epoch number and patience for this training
@@ -68,7 +68,7 @@ def train_masking_model(model, train_dl, val_dl, optim, device, params):
         for input_ids in train_progress:
 
             loss = train_on_mask_batch(model, input_ids, optim, device)
-            train_progress.set_description(f"Batch loss at {task_name} - {loss}")
+            train_progress.set_description(f"Masking batch loss - {loss}")
 
         inverse_loss = get_val_mask_inverse_loss(model, val_dl, device)
 
@@ -99,7 +99,7 @@ def get_val_mask_inverse_loss(model, val_dl, device):
     for input_ids in val_progress:
 
         with torch.no_grad():
-            loss = train_on_mask_batch(model, input_ids, optim, device)
+            loss = get_mask_model_loss(model, input_ids, device)
             loss = loss.item()
             total_loss += loss
 
@@ -111,6 +111,10 @@ def get_val_mask_inverse_loss(model, val_dl, device):
     return inverse_loss
 
 def get_mask_model_loss(model, input_ids, device):
+    # Dataloader stores data in a list, but in this case, we only have one  input stored (I.e. we have X, but no y).
+    # In short, input_ids is initially a list with one element, so we just pop that out of its element
+    input_ids = input_ids[0]
+
     # Get the Xs onto device
     input_ids = input_ids.to(device)
 
