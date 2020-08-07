@@ -1,4 +1,5 @@
 from mapping.mapping_models.data_fit_models.metadata_lm.bert_cls_trained_sublabel_mtl import BertClsTrainedSublabelMtlMapper
+from utils.bert_utils import get_lm_embeddings
 
 class BertClsTrainedMtlExceptMapper(BertClsTrainedSublabelMtlMapper):
     # We extend the BertClsTrainedSublabelMtlMapper as it is almost exactly the same as what we want to do here.
@@ -25,6 +26,9 @@ class BertClsTrainedMtlExceptMapper(BertClsTrainedSublabelMtlMapper):
         self.epochs = 100
         self.patience = 2
         self.training_col = "label"
+
+    def get_model_name(self):
+        return f"{self.test_dataset}.pt"
 
     def get_training_data(self):
         all_datasets_dict = self.get_all_datasets()
