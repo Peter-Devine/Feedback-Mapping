@@ -23,7 +23,7 @@ class SBertWKMapper(BaseMapper):
 
     def get_sentence_embeds(self, sentences):
         self.model_name = "binwang/bert-base-nli"
-        BATCH_SIZE = 64
+        self.eval_batch_size = 128
 
         #Get SBERT-WK model and tokenizer
         config = AutoConfig.from_pretrained(self.model_name, cache_dir=self.model_dir)
@@ -40,7 +40,7 @@ class SBertWKMapper(BaseMapper):
             "layer_start": 4
         }
 
-        test_loader = torch.utils.data.DataLoader(sentences, batch_size=BATCH_SIZE, shuffle=False)
+        test_loader = torch.utils.data.DataLoader(sentences, batch_size=self.eval_batch_size, shuffle=False)
 
         embeddings = []
         print("Inferencing on SBERT-WK")
