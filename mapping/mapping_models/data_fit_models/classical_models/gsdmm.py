@@ -4,6 +4,7 @@ from numpy import argmax
 import json
 from nltk.corpus import stopwords
 import nltk
+import pandas as pd
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
 from utils.utils import get_random_seed
