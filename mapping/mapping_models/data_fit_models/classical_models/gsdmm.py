@@ -37,7 +37,7 @@ class GsdmmMapper(BaseMapper):
 
         # Score each document, getting a probability distribution over all topics
         embeddings = [mgp.score(word_set) for word_set in list_of_word_sets]
-        embeddings = np.stack(embeds)
+        embeddings = np.stack(embeddings)
 
         return embeddings, df
 
