@@ -10,7 +10,7 @@ class BertClsTrainedSublabelOutsideMapper(BertClsTrainedSublabelMtlMapper):
     def get_training_data(self):
         # Use the review dataset gathered for https://giograno.me/assets/pdf/workshop/wama17.pdf
         df = pd.read_csv("https://raw.githubusercontent.com/sealuzh/user_quality/master/csv_files/reviews.csv", index_col=0)
-        df = df.rename({"review": "text", "star": "sublabel"})
+        df = df.rename(columns={"review": "text", "star": "sublabel"})
 
         return {"outside_dataset": {"MISC_APP": df}}
 
