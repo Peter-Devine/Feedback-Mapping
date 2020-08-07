@@ -77,7 +77,7 @@ def train_masking_model(model, train_dl, val_dl, optim, device, params):
         is_patience_up, epochs_since_last_best, best_score = check_best(model, epochs_since_last_best, inverse_loss, best_score, patience)
 
         if is_patience_up:
-            print(f"Ceasing training after {epoch} epochs")
+            print(f"Ceasing training after {epoch} epochs with the best score at {best_score}")
             break
 
     # Load the best saved model
@@ -103,11 +103,12 @@ def get_val_mask_inverse_loss(model, val_dl, device):
             loss = loss.item()
             total_loss += loss
 
+        val_progress.set_description(f"Inverse validation total loss {1/total_loss}")
+
     # Turn model back onto training mode
     model.train()
 
     inverse_loss = 1/total_loss
-    val_progress.set_description(f"Total loss {total_loss}")
     return inverse_loss
 
 def get_mask_model_loss(model, input_ids, device):
