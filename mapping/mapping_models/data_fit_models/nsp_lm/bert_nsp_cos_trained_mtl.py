@@ -25,8 +25,8 @@ class BertNspCosTrainedMtlMapper(BaseMapper):
         self.lr = 5e-5
         self.eps = 1e-6
         self.wd = 0.01
-        self.epochs = 30
-        self.patience = 1
+        self.epochs = 100
+        self.patience = 2
 
     def get_model(self):
         model_path = os.path.join(self.model_dir, self.get_model_name())

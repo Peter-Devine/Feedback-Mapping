@@ -21,14 +21,14 @@ class BertNspTrainedMtlMapper(BertMaskingTrainedMtlMapper):
 
     def set_parameters(self):
         self.model_name = 'bert-base-uncased'
-        self.max_length = 256
-        self.batch_size = 64
+        self.max_length = 128
+        self.batch_size = 32
         self.eval_batch_size = 64
         self.lr = 5e-5
         self.eps = 1e-6
         self.wd = 0.01
-        self.epochs = 1
-        self.patience = 1
+        self.epochs = 100
+        self.patience = 2
 
     def train_model(self, model_path):
         train_df = self.get_training_data()

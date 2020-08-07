@@ -22,8 +22,8 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
         self.lr = 5e-5
         self.eps = 1e-6
         self.wd = 0.01
-        self.epochs = 30
-        self.patience = 1
+        self.epochs = 100
+        self.patience = 2
         self.training_col = "sublabel"
 
     def get_model(self):
@@ -80,7 +80,7 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
                     train_df = train_df.append(app_df).reset_index(drop=True)
 
             # If the dfs for this dataset do not contain the column needed to train a classification model
-            # (and so we have skipped over all of them, leaving train_df to still be None), 
+            # (and so we have skipped over all of them, leaving train_df to still be None),
             # then we do not add this dataset to our training set
             if train_df is None:
                 continue

@@ -22,8 +22,8 @@ class BertClsTrainedMtlExceptMapper(BertClsTrainedSublabelMtlMapper):
         self.lr = 5e-5
         self.eps = 1e-6
         self.wd = 0.01
-        self.epochs = 30
-        self.patience = 1
+        self.epochs = 100
+        self.patience = 2
         self.training_col = "label"
 
     def get_training_data(self):
