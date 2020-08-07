@@ -3,6 +3,7 @@ from numpy import log, exp
 from numpy import argmax
 import json
 from nltk.corpus import stopwords
+import nltk
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
 from utils.utils import get_random_seed
