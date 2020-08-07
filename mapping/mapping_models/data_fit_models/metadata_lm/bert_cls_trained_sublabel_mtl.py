@@ -68,21 +68,21 @@ class BertClsTrainedSublabelMtlMapper(BaseMapper):
 
             # Combine all app data for one dataset into a single df
             train_df = None
-            dataset_contains_training_col = True
             for app_name, app_df in app_train_dfs_dict.items():
 
                 # We skip any datasets that do not have the columns that we are looking to train on
                 if self.training_col not in app_df.columns:
-                    dataset_contains_training_col = False
-                    break
+                    continue
 
                 if train_df is None:
                     train_df = app_df
                 else:
                     train_df = train_df.append(app_df).reset_index(drop=True)
 
-            # If the dfs for this dataset do not contain the column needed to train a classification model, then we do not add this dataset to our training set
-            if not dataset_contains_training_col:
+            # If the dfs for this dataset do not contain the column needed to train a classification model
+            # (and so we have skipped over all of them, leaving train_df to still be None), 
+            # then we do not add this dataset to our training set
+            if train_df is None:
                 continue
 
             # Train the classifier model to predict sublabel
