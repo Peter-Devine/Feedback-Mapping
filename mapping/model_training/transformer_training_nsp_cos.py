@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 
-from mapping.model_training.transformer_models import get_nsp_model_and_optimizer
+from mapping.model_training.transformer_models import get_nsp_cos_model_and_optimizer
 from mapping.model_training.transformer_eval import create_eval_engine
 from mapping.model_training.transformer_training_utils import get_inputs, train_on_mtl_datasets, get_lm_and_tok
 
