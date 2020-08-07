@@ -1,6 +1,7 @@
 from numpy.random import multinomial
 from numpy import log, exp
 from numpy import argmax
+import numpy as np
 import json
 from nltk.corpus import stopwords
 import nltk
