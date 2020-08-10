@@ -1,5 +1,5 @@
 import torch
-from transformers import AutoTokenizer, AutoModel, T5ForConditionalGeneration
+from transformers import AutoTokenizer, AutoModel
 
 import numpy as np
 

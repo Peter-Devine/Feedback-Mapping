@@ -2,6 +2,8 @@ import torch
 
 from tqdm import tqdm
 
+from transformers import DataCollatorForLanguageModeling
+
 from mapping.model_training.transformer_models import get_masking_model_and_optimizer
 from mapping.model_training.transformer_training_utils import get_inputs, get_tokenizer, check_best, load_model
 
@@ -45,11 +47,25 @@ def get_masking_dataloader(df, tokenizer, params, is_train):
     batch_size = params["batch_size"]
 
     # Tokenize and convert to input IDs
-    X = get_inputs(df.text, tokenizer, max_len)
+    input_ids = get_inputs(df.text, tokenizer, max_len)
+    masked_ids, labels = mask_ids(input_ids, tokenizer)
 
-    data_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(X), batch_size=batch_size, shuffle=is_train)
+    data_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(masked_ids, labels), batch_size=batch_size, shuffle=is_train)
 
     return data_loader
+
+def mask_ids(input_ids, tokenizer):
+    data_collator = DataCollatorForLanguageModeling(tokenizer)
+
+    # DataCollatorForLanguageModeling needs a list of input ids - with one entry for every observation.
+    list_of_ids = [ids for ids in input_ids]
+
+    outputs = data_collator(list_of_ids)
+
+    masked_input_ids = outputs["input_ids"]
+    labels = outputs["labels"]
+
+    return masked_input_ids, labels
 
 def train_masking_model(model, train_dl, val_dl, optim, device, params):
     # Get epoch number and patience for this training
@@ -112,15 +128,15 @@ def get_val_mask_inverse_loss(model, val_dl, device):
     return inverse_loss
 
 def get_mask_model_loss(model, input_ids, device):
-    # Dataloader stores data in a list, but in this case, we only have one  input stored (I.e. we have X, but no y).
-    # In short, input_ids is initially a list with one element, so we just pop that out of its element
-    input_ids = input_ids[0]
+    # We have saved the masked ids as the first element, and the mask labels as the second
+    masked_ids, labels = input_ids
 
     # Get the Xs onto device
-    input_ids = input_ids.to(device)
+    masked_ids = masked_ids.to(device)
+    labels = labels.to(device)
 
     # Put the Xs into the model as both input and output
-    outputs = model(input_ids, labels=input_ids)
+    outputs = model(masked_ids, labels=labels)
 
     # Loss is calculated in the model using CrossEntropyLoss
     loss = outputs[0]
