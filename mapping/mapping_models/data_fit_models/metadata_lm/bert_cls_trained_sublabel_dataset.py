@@ -1,4 +1,5 @@
 from mapping.mapping_models.data_fit_models.metadata_lm.bert_cls_trained_sublabel_mtl import BertClsTrainedSublabelMtlMapper
+from utils.bert_utils import get_lm_embeddings
 
 class BertClsTrainedSublabelDatasetMapper(BertClsTrainedSublabelMtlMapper):
     # Since the dataset training task is just a subset of the MTL task (but only with one task), we simply extend the MTL class, and change the data provided to it.
