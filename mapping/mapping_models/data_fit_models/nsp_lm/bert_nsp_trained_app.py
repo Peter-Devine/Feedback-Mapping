@@ -1,3 +1,5 @@
+import pandas as pd
+
 from mapping.mapping_models.data_fit_models.nsp_lm.bert_nsp_trained_mtl import BertNspTrainedMtlMapper
 
 class BertNspTrainedAppMapper(BertNspTrainedMtlMapper):
