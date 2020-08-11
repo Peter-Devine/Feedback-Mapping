@@ -8,6 +8,7 @@ from sklearn.metrics import homogeneity_score
 from sklearn.metrics import pairwise_distances_argmin_min
 
 from utils.utils import create_dir, get_random_seed
+from embed_evaluation.make_examples_viz import create_example_viz_html
 
 # Find all the embeddings, and evaluate them
 def eval_embeds():
@@ -20,6 +21,7 @@ def eval_embeds():
         for app_name, app_dfs in dataset_dfs.items():
             # Cycle through each embedding type in an app
             for embedding_name, (embedding_df, labels) in app_dfs.items():
+                print(f"Evaluating embedding for {dataset_name} >> {app_name} >> {embedding_name}")
                 # Get the score for an embedding
                 eval_embed(dataset_name, app_name, embedding_name, embedding_df, labels)
 
@@ -34,7 +36,7 @@ def eval_embed(dataset_name, app_name, embedding_name, embedding_df, labels):
     score_embeddings(dataset_name, app_name, embedding_name, embeddings, labels)
 
     # Get some qualitative measures to intuitively evaluate the embeddings (sanity check)
-    get_k_closest_example_points(dataset_name, app_name, embedding_name, embeddings, labels, k=20)
+    sort_points_by_ref(dataset_name, app_name, embedding_name, embeddings, labels)
 
 # As a sanity check as much as anything, we look at what the distribution of labels are etc.
 def basic_label_info(dataset_name, app_name, embedding_name, labels):
@@ -42,7 +44,7 @@ def basic_label_info(dataset_name, app_name, embedding_name, labels):
     vc = labels.value_counts(normalize=True)
     vc_norm = labels.value_counts(normalize=False)
     label_info_df = pd.DataFrame({"counts": vc, "norm" : vc_norm})
-    output_results_df("label_info", dataset_name, app_name, embedding_name, label_info_df)
+    output_results_df("label_info", dataset_name, app_name, "label_info", label_info_df)
 
 # Score the given embedding relative to multiple metrics
 def score_embeddings(dataset_name, app_name, embedding_name, embedding_df, labels):
@@ -55,7 +57,7 @@ def score_embeddings(dataset_name, app_name, embedding_name, embedding_df, label
     embed_scores["15_cos_nn_sim"] = get_knn_similarity_score(embedding_df, labels, k=15, metric="cosine")
 
     # Get this scoring into a df form
-    df = pd.DataFrame(scorings, index=["scorings"])
+    df = pd.DataFrame(embed_scores, index=["scorings"])
 
     # Output this df to disk
     output_results_df("scores", dataset_name, app_name, embedding_name, df)
@@ -65,6 +67,12 @@ def output_results_df(result_type, dataset_name, app_name, embedding_name, df):
     app_dir = create_results_dirs(result_type, dataset_name, app_name)
     file_path = os.path.join(app_dir, embedding_name)
     output_df(df, file_path)
+
+# Saves the df to a .html file with an interactive visualisation of the points relative to an example point
+def output_results_example(dataset_name, app_name, embedding_name, df):
+    app_dir = create_results_dirs("examples", dataset_name, app_name)
+    file_path = os.path.join(app_dir, embedding_name)
+    create_example_viz_html(df, file_path)
 
 # Makes sure that the ./results/[dataset_name]/[app_name] dir exists
 def create_results_dirs(result_type, dataset_name, app_name):
@@ -137,7 +145,6 @@ def get_pairwise_dist(embeddings, metric):
 def get_knn_similarity_score(embeddings, labels, k=5, metric="euclidean"):
     # Get the distances between each embedding
     mutual_distances = get_pairwise_dist(embeddings, metric=metric)
-    print(mutual_distances.shape)
 
     # Find the arguments of the k closest points
     closest_args = [dist.argsort()[:k] for dist in mutual_distances]
@@ -157,10 +164,10 @@ def get_knn_similarity_score(embeddings, labels, k=5, metric="euclidean"):
     return avg_similar_neighbours
 
 # Gets the text of example points
-def get_k_closest_example_points(dataset_name, app_name, embedding_name, embeddings, labels, k=20):
+def sort_points_by_ref(dataset_name, app_name, embedding_name, embeddings, labels):
     # First, find the euclidean distances between every embedding
     mutual_distances = get_pairwise_dist(embeddings, metric="euclidean")
-    closest_args = dist.argsort()[:, :k]
+    closest_args = mutual_distances.argsort()
 
     # We also find the cos distance to see if there are any great discrepancies between cos and euclidean
     mutual_cos_distances = get_pairwise_dist(embeddings, metric="cosine")
@@ -169,7 +176,7 @@ def get_k_closest_example_points(dataset_name, app_name, embedding_name, embeddi
 
     for label in labels.unique():
         # Get the randomly sampled reference points position
-        ref_idx = labels[labels == label].sample(n = 1, random_state = get_random_seed()).index.iloc[0]
+        ref_idx = labels[labels == label].sample(n = 1, random_state = get_random_seed()).index[0]
         ref_numerical_idx = labels.index.get_loc(ref_idx)
 
         # Find the numerical position and distance of the k nearest points to the reference point
@@ -178,13 +185,13 @@ def get_k_closest_example_points(dataset_name, app_name, embedding_name, embeddi
         nearest_points_cos_distances = mutual_cos_distances[ref_numerical_idx, nearest_points_numerical_idx]
 
         # Get the indices of reference point + knn
-        select_idx = [ref_numerical_idx] + [x for x in nearest_points_numerical_idx]
+        select_idx = [x for x in nearest_points_numerical_idx]
 
         # Get the accompanying text and labels of these points
-        nearest_df = get_examples_text(nearest_points_numerical_idx, dataset_name, app_name)
+        nearest_df = get_examples_text(select_idx, dataset_name, app_name)
         nearest_df["point_num"] = [f"{label}_point_{i}" for i in range(nearest_df.shape[0])]
-        nearest_df["euclidean_distance"] = [0] + [x for x in nearest_points_distances]
-        nearest_df["cosine_distance"] = [0] + [x for x in nearest_points_cos_distances]
+        nearest_df["euclidean_distance"] = [x for x in nearest_points_distances]
+        nearest_df["cosine_distance"] = [x for x in nearest_points_cos_distances]
 
         nearest_df = nearest_df.set_index("point_num", drop=False)
 
@@ -192,6 +199,8 @@ def get_k_closest_example_points(dataset_name, app_name, embedding_name, embeddi
             all_points_df = nearest_df
         else:
             all_points_df.append(nearest_df)
+
+        output_results_example(dataset_name, app_name, f"{embedding_name}_{label}", nearest_df)
 
     output_results_df("examples", dataset_name, app_name, embedding_name, all_points_df)
 
