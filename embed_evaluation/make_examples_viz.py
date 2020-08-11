@@ -1,4 +1,4 @@
-from bokeh.plotting import ColumnDataSource, figure, output_file, show
+from bokeh.plotting import ColumnDataSource, figure, output_file, save
 from bokeh.palettes import Turbo256
 from bokeh.models import CustomJS, Slider, Select,TextInput
 from bokeh.layouts import column, row
@@ -70,3 +70,5 @@ def create_example_viz_html(df, file_path):
 
     # output to static HTML file
     output_file(f"{file_path}.html")
+
+    save(layout)
