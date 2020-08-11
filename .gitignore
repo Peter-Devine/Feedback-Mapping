@@ -10,3 +10,4 @@ results/visualisations/
 mapping/mapping_models/saved_models/
 .ipynb_checkpoints/
 mapping/model_training/temp_models
+mapping/model_training/training_logs
