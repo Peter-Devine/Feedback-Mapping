@@ -14,7 +14,7 @@ class TrainingLogger:
 
         # Make a file path for the new logger output
         self.file_dir = os.path.join(self.log_dir, file_str)
-        assert not os.file.exists(self.file_dir), f"{self.file_dir} already exists. This probably shouldn't happen unless the TrainingLogger is initialized at the same millisecond as another logger. Please investigate."
+        assert not os.path.exists(self.file_dir), f"{self.file_dir} already exists. This probably shouldn't happen unless the TrainingLogger is initialized at the same millisecond as another logger. Please investigate."
 
         # We start the logging by stating the date
         readable_date = datetime.datetime.now().strftime("%y-%m-%d %H:%M:%S")
