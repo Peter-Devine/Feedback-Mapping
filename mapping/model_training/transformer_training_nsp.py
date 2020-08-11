@@ -7,6 +7,7 @@ from mapping.model_training.transformer_models import get_nsp_model_and_optimize
 from mapping.model_training.transformer_training_utils import get_tokenizer, check_best, load_model
 
 from utils.utils import split_df
+from utils.logger_utils import TrainingLogger
 
 def train_nsp(df, params, device):
     # Trains a model to predict whether the supplied sentence is the next sentence
@@ -72,24 +73,36 @@ def train_nsp_model(model, train_dl, val_dl, optim, device, params):
     epochs_since_last_best = 0
     best_score = -1
 
+    # We log the training task (Always NSP in this case) and the training size to identify exactly what task was getting done
+    logger = TrainingLogger()
+    logger.log(f"Training task: NSP (orthodox)")
+    logger.log(f"Training size: {len(train_dl)}")
+    logger.log(f"Val size: {len(val_dl)}\n")
+
     # Iterate over n epochs
     for epoch in tqdm(range(epochs), desc="Epoch"):
 
         # Train on all batches
         train_progress = tqdm(train_dl, desc="Batch")
+        total_loss = 0
         for input_ids, type_ids, att_mask, y in train_progress:
 
             loss = train_on_nsp_batch(model, input_ids, type_ids, att_mask, y, optim, device)
             train_progress.set_description(f"Masking batch loss - {loss}")
+            total_loss += loss
+
+        logger.log(f"Total training loss at epoch {epoch} is {total_loss}")
 
         inverse_loss = get_val_nsp_inverse_loss(model, val_dl, device)
+
+        logger.log(f"Inverse validation loss is {inverse_loss} at epoch {epoch}")
 
         # Check if the average target metric has improved since the last best. If so, save model.
         # Also check if the patience for training has been exceeded.
         is_patience_up, epochs_since_last_best, best_score = check_best(model, epochs_since_last_best, inverse_loss, best_score, patience)
 
         if is_patience_up:
-            print(f"Ceasing training after {epoch} epochs with the best score at {best_score}")
+            logger.log(f"Ceasing training after {epoch} epochs with the best score at {best_score}")
             break
 
     # Load the best saved model

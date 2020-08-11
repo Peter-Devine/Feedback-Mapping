@@ -8,6 +8,7 @@ import os
 from tqdm import tqdm
 
 from utils.utils import randomly_shuffle_list
+from utils.logger_utils import TrainingLogger
 
 def get_lm_and_tok(model_name, device):
     # Load pre-trained model tokenizer (vocabulary)
@@ -98,6 +99,10 @@ def train_on_mtl_datasets(tasks_dict, loss_fn, params, device, target_metric):
     epochs_since_last_best = 0
     best_score = -1
 
+    logger = TrainingLogger()
+
+    logger.log(f"Training tasks: {tasks_dict.keys()}\n")
+
     for epoch in tqdm(range(epochs), desc="Epoch"):
 
         # Get a list of all tasks to train on, with one entry per batch that that task has in its training set. Then randomly shuffle these tasks, and train in that order.
@@ -107,6 +112,7 @@ def train_on_mtl_datasets(tasks_dict, loss_fn, params, device, target_metric):
 
         # Train on all batches
         tasks_progress = tqdm(task_training_list, desc="Batch")
+        total_loss = 0
         for task_name in tasks_progress:
             # Get the current batch and relevant data for the current training task
             batch = next(training_iters[task_name])
@@ -117,13 +123,18 @@ def train_on_mtl_datasets(tasks_dict, loss_fn, params, device, target_metric):
             loss = train_on_batch(model, batch, optim, loss_fn, n_classes, device)
             tasks_progress.set_description(f"Batch loss at {task_name} - {loss}")
 
+            total_loss += loss
+
+        logger.log(f"Total loss at epoch {epoch} is {total_loss}")
+
         task_results = get_mtl_validation_results(tasks_dict)
 
         # Calculate whether patience has been exceeded or not on the target metric
         # Here, we average the target metric across all datasets
+        # We output this score for debugging
         target_score_list = [results[target_metric] for task_name, results in task_results.items()]
         target_score = sum(target_score_list) / len(target_score_list)
-        print(f"{target_metric} is {target_score} at epoch {epoch}")
+        logger.log(f"{target_metric} is {target_score} at epoch {epoch}")
 
         # Get any model from tasks dict. They all share the same shared language model layer anyway, which is the one we will take.
         any_model = get_any_model_from_mtl_task_dict(tasks_dict)
@@ -133,7 +144,7 @@ def train_on_mtl_datasets(tasks_dict, loss_fn, params, device, target_metric):
 
         # When patience has been exceeded, cease training, ad the model is no longer getting any better.
         if is_patience_up:
-            print(f"Stopping training at epoch {epoch} with best metric as {best_score}")
+            logger.log(f"Stopping training at epoch {epoch} with best metric as {best_score}")
             break
 
     any_model = get_any_model_from_mtl_task_dict(tasks_dict)
