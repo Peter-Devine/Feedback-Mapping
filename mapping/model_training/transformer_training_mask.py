@@ -8,6 +8,7 @@ from mapping.model_training.transformer_models import get_masking_model_and_opti
 from mapping.model_training.transformer_training_utils import get_inputs, get_tokenizer, check_best, load_model
 
 from utils.utils import split_df
+from utils.logger_utils import TrainingLogger
 
 def train_mask(df, params, device):
     # Trains a model to predict masked words on inputted text
