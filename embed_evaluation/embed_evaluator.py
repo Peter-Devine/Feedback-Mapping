@@ -219,8 +219,6 @@ def sort_points_by_ref(dataset_name, app_name, embedding_name, embeddings, label
     # We also find the cos distance to see if there are any great discrepancies between cos and euclidean
     mutual_cos_distances = get_pairwise_dist(embeddings, metric="cosine")
 
-    all_points_df = None
-
     for label in labels.unique():
         # Get the randomly sampled reference points position
         ref_idx = labels[labels == label].sample(n = 1, random_state = get_random_seed()).index[0]
@@ -242,14 +240,8 @@ def sort_points_by_ref(dataset_name, app_name, embedding_name, embeddings, label
 
         nearest_df = nearest_df.set_index("point_num", drop=False)
 
-        if all_points_df is None:
-            all_points_df = nearest_df
-        else:
-            all_points_df.append(nearest_df)
-
-        output_results_example(dataset_name, app_name, f"{embedding_name}_{label}", nearest_df)
-
-    output_results_df("examples", dataset_name, app_name, embedding_name, all_points_df)
+        output_results_example(dataset_name, app_name, f"{embedding_name}__{label}", nearest_df)
+        output_results_df("examples", dataset_name, app_name,  f"{embedding_name}__{label}", nearest_df)
 
 def get_examples_text(idx, dataset_name, app_name):
     # Get the original text data of the dataset
