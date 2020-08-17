@@ -1,7 +1,9 @@
 import os
 import pandas as pd
 import numpy as np
-import scipy
+from scipy import spatial
+from scipy import stats
+import statistics
 
 from sklearn.cluster import KMeans
 from sklearn.metrics import homogeneity_score
@@ -55,6 +57,10 @@ def score_embeddings(dataset_name, app_name, embedding_name, embedding_df, label
     embed_scores["5_cos_nn_sim"] = get_knn_similarity_score(embedding_df, labels, k=5, metric="cosine")
     embed_scores["10_cos_nn_sim"] = get_knn_similarity_score(embedding_df, labels, k=10, metric="cosine")
     embed_scores["15_cos_nn_sim"] = get_knn_similarity_score(embedding_df, labels, k=15, metric="cosine")
+    p_val, intra_mean, inter_mean = avg_inter_label_distance_diff_p(embeddings, labels)
+    embed_scores["p_val"] = p_val
+    embed_scores["intra_mean"] = intra_mean
+    embed_scores["inter_mean"] = inter_mean
 
     # Get this scoring into a df form
     df = pd.DataFrame(embed_scores, index=["scorings"])
@@ -139,7 +145,7 @@ def output_df(df, file_name):
 
 # Find the distance between each embedding
 def get_pairwise_dist(embeddings, metric):
-    return scipy.spatial.distance.squareform(scipy.spatial.distance.pdist(embeddings, metric=metric))
+    return spatial.distance.squareform(spatial.distance.pdist(embeddings, metric=metric))
 
 # Finds the average number of points with the same label in the k nearest points to any one point.
 def get_knn_similarity_score(embeddings, labels, k=5, metric="euclidean"):
@@ -162,6 +168,47 @@ def get_knn_similarity_score(embeddings, labels, k=5, metric="euclidean"):
     avg_similar_neighbours = total_number_similar_neighbours / len(labels)
 
     return avg_similar_neighbours
+
+# Finds the average number of points with the same label in the k nearest points to any one point.
+def avg_inter_label_distance_diff_p(embeddings, labels, metric="euclidean"):
+    # Get the distances between each embedding
+    mutual_distances = get_pairwise_dist(embeddings, metric=metric)
+
+    all_intra_label_distances = []
+    all_inter_label_distances = []
+
+    for label in labels.unique():
+        # Find all positions which match a certain label
+        label_mask = labels == label
+
+        # Find the distances between all points of a certain label
+        intra_label_distances = mutual_distances[label_mask][:,label_mask]
+
+        # Find the distance between each in-label/out-label pair of points
+        inter_label_distances = mutual_distances[~label_mask][:,label_mask]
+
+        # Set the distance between a point and itself as None, which we will exclude later
+        np.fill_diagonal(intra_label_distances, None)
+
+        # Flatten array of distances
+        intra_label_distances = intra_label_distances.flatten()
+        inter_label_distances = inter_label_distances.flatten()
+
+        # Remove the None or nan values from intra label distances (distance of a point to itself)
+        intra_label_distances = intra_label_distances[~np.isnan(intra_label_distances)]
+
+        # Add the intra and inter label distances to the list of intra/inter label distances for all labelss
+        all_intra_label_distances.extend(intra_label_distances)
+        all_inter_label_distances.extend(inter_label_distances)
+
+    # Calculate the p-value of the 2 tailed independent welch's t-test between the inter and intra label distances
+    distance_p_val = stats.ttest_ind(all_intra_label_distances, all_inter_label_distances, equal_var=False, nan_policy='raise').pvalue
+
+    # Calculate the mean of these distances
+    intra_mean = statistics.mean(all_intra_label_distances)
+    inter_mean = statistics.mean(all_inter_label_distances)
+
+    return distance_p_val, intra_mean, inter_mean
 
 # Gets the text of example points
 def sort_points_by_ref(dataset_name, app_name, embedding_name, embeddings, labels):
