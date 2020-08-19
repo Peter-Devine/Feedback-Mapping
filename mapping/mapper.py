@@ -10,8 +10,12 @@ from mapping.mapping_models.data_blind_models.bert_likes.bart_vanilla import Bar
 from mapping.mapping_models.data_blind_models.bert_likes.bert_vanilla_first_tok import BertVanillaFirstTokMapper
 from mapping.mapping_models.data_blind_models.bert_likes.bert_vanilla_large import BertVanillaLargeMapper
 from mapping.mapping_models.data_blind_models.bert_likes.bert_vanilla import BertVanillaMapper
+from mapping.mapping_models.data_blind_models.bert_likes.declutr_vanilla import DeclutrVanillaMapper
 from mapping.mapping_models.data_blind_models.bert_likes.distilbert_vanilla import DistilbertVanillaMapper
 from mapping.mapping_models.data_blind_models.bert_likes.roberta_vanilla_large import RobertaVanillaLargeMapper
+from mapping.mapping_models.data_blind_models.bert_likes.sentence_transformer_bert import SentenceTransformerBertVanillaMapper
+from mapping.mapping_models.data_blind_models.bert_likes.sentence_transformer_distilbert import SentenceTransformerDistilbertVanillaMapper
+from mapping.mapping_models.data_blind_models.bert_likes.sentence_transformer_roberta import SentenceTransformerRobertaVanillaMapper
 
 ### Outside trained in-domain data blind models
 from mapping.mapping_models.data_blind_models.outside_trained.bert_cls_trained_sublabel_outside import BertClsTrainedSublabelOutsideMapper
@@ -69,8 +73,12 @@ MAPPER_DICT = {
     "bert_vanilla_first_tok": BertVanillaFirstTokMapper,
     "bert_vanilla_large": BertVanillaLargeMapper,
     "bert_vanilla": BertVanillaMapper,
+    "declutr_vanilla": DeclutrVanillaMapper,
     "distilbert_vanilla": DistilbertVanillaMapper,
     "roberta_vanilla_large": RobertaVanillaLargeMapper,
+    "sentence_transformer_bert": SentenceTransformerBertVanillaMapper,
+    "sentence_transformer_distilbert": SentenceTransformerDistilbertVanillaMapper,
+    "sentence_transformer_roberta": SentenceTransformerRobertaVanillaMapper,
 
     "bert_cls_trained_sublabel_outside": BertClsTrainedSublabelOutsideMapper,
     "bert_masking_trained_outside": BertMaskingTrainedOutsideMapper,
