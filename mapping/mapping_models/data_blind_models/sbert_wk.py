@@ -23,7 +23,7 @@ class SBertWKMapper(BaseMapper):
 
     def get_sentence_embeds(self, sentences):
         self.model_name = "binwang/bert-base-nli"
-        self.eval_batch_size = 128
+        self.eval_batch_size = 256
 
         #Get SBERT-WK model and tokenizer
         config = AutoConfig.from_pretrained(self.model_name, cache_dir=self.model_dir)

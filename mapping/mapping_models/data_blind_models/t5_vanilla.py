@@ -20,7 +20,7 @@ class T5VanillaMapper(BaseMapper):
     def set_parameters(self):
         self.model_name = 't5-base'
         self.max_length = 128
-        self.eval_batch_size = 128
+        self.eval_batch_size = 256
 
     def get_mapping_name(self):
         return "t5_vanilla"

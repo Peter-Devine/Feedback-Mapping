@@ -12,7 +12,7 @@ class SBertMapper(BaseMapper):
         model = model.to(self.device)
 
         # Get embeddings for sentences
-        BATCH_SIZE = 64
+        BATCH_SIZE = 256
         sentence_embeddings = model.encode(df.text.values, batch_size = BATCH_SIZE, show_progress_bar = True)
 
         return sentence_embeddings, df
