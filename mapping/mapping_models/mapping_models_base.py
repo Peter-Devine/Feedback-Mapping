@@ -40,6 +40,7 @@ class BaseMapper:
 
         # Get the device that is available currently for torch training/inference
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        print(f"Available PyTorch device is {self.device}")
 
         # Model directory
         self.model_repo_dir = os.path.join(".", "mapping", "mapping_models", "saved_models")
