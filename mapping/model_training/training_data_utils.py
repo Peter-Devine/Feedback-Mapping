@@ -3,7 +3,6 @@ import math
 import pandas as pd
 import random
 from transformers import AutoTokenizer
-from nltk.util import ngrams
 from utils.utils import get_random_seed, split_df, randomly_sample_list
 
 ################ CURRENTLY SIMILARITY SCORES ARE UNUSED, BUT MIGHT BE HANDY LATER ###############################
