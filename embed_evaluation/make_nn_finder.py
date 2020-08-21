@@ -2,7 +2,7 @@ from bokeh.plotting import ColumnDataSource, output_file, save
 from bokeh.models import CustomJS, TextInput, DataTable, TableColumn
 from bokeh.layouts import column, row
 
-def create_feedback_viz_html(distances, text_df,  file_path):
+def create_nn_finder_html(distances, text_df,  file_path):
 
     source = ColumnDataSource(data=dict(
         ids=range(len(df_text.text)),
