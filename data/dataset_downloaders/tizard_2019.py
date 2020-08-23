@@ -84,7 +84,7 @@ class Tizard2019(DownloadUtilBase):
 
         df = df.rename(columns={'sentence': 'text'})
         df["app"] = df["topic_forum"].str.lower()
-        df["sublabel"] = df["user_level"].str.lower().str.strip()
+        df["sublabel"] = df["post_position"].str.lower().str.strip()
 
         shutil.rmtree(task_data_path)
 
