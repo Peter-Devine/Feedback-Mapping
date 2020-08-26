@@ -42,7 +42,7 @@ def collate_scores(metric):
 
     collated_df.to_csv(collated_scores_path)
 
-    indices = collated_df.max().sort_values(ascending=True).index
+    indices = collated_df.mean().sort_values(ascending=True).index
     collated_df.loc[:, indices].boxplot(figsize=(11,6))
     ax = collated_df.loc[:, indices].plot.box(figsize=(30,18))#.legend(loc='center left',bbox_to_anchor=(1.0, 0.5))
     ax.set_xticklabels([i.replace("_", "\n") for i in indices])
