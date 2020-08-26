@@ -36,21 +36,28 @@ def collate_scores(metric):
                         embedding_name = score_file[:-4]
                         collated_scores[app_dataset_name][embedding_name] = score
 
-    collated_scores_path = os.path.join(scores_path, "collated_score.csv")
+    collated_scores_path = os.path.join(scores_path, f"{metric}_collated_score.csv")
 
     collated_df = pd.DataFrame(collated_scores).T
 
     collated_df.to_csv(collated_scores_path)
 
-    collated_df.loc[:, collated_df.max().sort_values(ascending=True).index].boxplot(figsize=(11,6))
-
     indices = collated_df.max().sort_values(ascending=True).index
+    collated_df.loc[:, indices].boxplot(figsize=(11,6))
     ax = collated_df.loc[:, indices].plot.box(figsize=(30,18))#.legend(loc='center left',bbox_to_anchor=(1.0, 0.5))
     ax.set_xticklabels([i.replace("_", "\n") for i in indices])
 
     plt.savefig(os.path.join(scores_path, f"{metric}_collated_boxplot.png"))
 
     plt.close()
+
+    ax = collated_df.rank(ascending = False, axis=1).mean().sort_values().plot.bar(figsize=(15,9))
+    ax.set_ylabel("Average ranking")
+
+    plt.savefig(os.path.join(scores_path, f"{metric}_average_ranking.png"))
+
+    plt.close()
+
 
     ax = collated_df.plot.bar(figsize=(16,9))
     ax.set_xticklabels([i.replace("_", "\n") for i in collated_df.index])
