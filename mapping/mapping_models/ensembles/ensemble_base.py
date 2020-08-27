@@ -44,7 +44,7 @@ class EnsembleBaseMapper(BaseMapper):
         PCA_SIZE = self.get_pca_size()
         if PCA_SIZE > 0:
             pca = PCA(n_components=PCA_SIZE)
-            concatenated_embedding = pca.fit_transform(tf_idf_embed)
+            concatenated_embedding = pca.fit_transform(concatenated_embedding)
 
         return concatenated_embedding, raw_df
 
