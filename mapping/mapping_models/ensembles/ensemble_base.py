@@ -41,14 +41,14 @@ class EnsembleBaseMapper(BaseMapper):
                 concatenated_embedding = np.concatenate([concatenated_embedding, embeddings], axis=1)
 
         # Reduce size of ensemble embedding if set
-        PCA_SIZE = self.get_pca_size()
+        PCA_SIZE = self.get_pca_size(concatenated_embedding)
         if PCA_SIZE > 0:
             pca = PCA(n_components=PCA_SIZE)
             concatenated_embedding = pca.fit_transform(concatenated_embedding)
 
         return concatenated_embedding, raw_df
 
-    def get_pca_size(self):
+    def get_pca_size(self, concatenated_embedding):
         # Returns the number of components to use in PCA decomposition.
         # 0 for no PCA decomposition.
         return 0
