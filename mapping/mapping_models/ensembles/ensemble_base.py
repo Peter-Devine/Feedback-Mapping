@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
+from sklearn.decomposition import PCA
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
 
@@ -13,7 +14,7 @@ class EnsembleBaseMapper(BaseMapper):
         concatenated_embedding = None
 
         # Cycle through all the embedding types given for this ensembler
-        embedding_types_to_ensemble = get_ensemble_components()
+        embedding_types_to_ensemble = self.get_ensemble_components()
         for embedding_type in embedding_types_to_ensemble:
             # Get the dir for this embedding, and make sure it exists first
             embedding_dir = os.path.join(embeddings_dir, f"{embedding_type}.csv")
@@ -36,8 +37,18 @@ class EnsembleBaseMapper(BaseMapper):
             else:
                 concatenated_embedding = np.concatenate([concatenated_embedding, embeddings], axis=1)
 
+        # Reduce size of ensemble embedding if set
+        PCA_SIZE = self.get_pca_size()
+        if PCA_SIZE > 0:
+            pca = PCA(n_components=PCA_SIZE)
+            concatenated_embedding = pca.fit_transform(tf_idf_embed)
+
         return concatenated_embedding, labels
 
+    def get_pca_size(self):
+        # Returns the number of components to use in PCA decomposition.
+        # 0 for no PCA decomposition.
+        return 0
 
     def get_ensemble_components(self):
         raise NotImplementedError(f"Ensemble mapper needs a list of embeddings with which to create the ensemble")

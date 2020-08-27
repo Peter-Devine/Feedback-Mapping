@@ -66,6 +66,14 @@ from mapping.mapping_models.data_fit_models.nsp_lm.bert_nsp_trained_app import B
 from mapping.mapping_models.data_fit_models.nsp_lm.bert_nsp_trained_dataset import BertNspTrainedDatasetMapper
 from mapping.mapping_models.data_fit_models.nsp_lm.bert_nsp_trained_mtl import BertNspTrainedMtlMapper
 
+##########################################################
+################### Ensembles ############################
+##########################################################
+
+from mapping.mapping_models.ensembles.ensemble_sbert_wk_use import EnsembleSbertWkUseMapper
+from mapping.mapping_models.ensembles.ensemble_sbert_wk_use_pca import EnsembleSbertWkUsePcaMapper
+
+
 MAPPER_DICT = {
     # Data fit classical models
     "albert_vanilla": AlbertVanillaMapper,
@@ -117,6 +125,9 @@ MAPPER_DICT = {
     "bert_nsp_trained_app": BertNspTrainedAppMapper,
     "bert_nsp_trained_dataset": BertNspTrainedDatasetMapper,
     "bert_nsp_trained_mtl": BertNspTrainedMtlMapper,
+
+    "ensemble_sbert_wk_use": EnsembleSbertWkUseMapper,
+    "ensemble_sbert_wk_use_pca": EnsembleSbertWkUsePcaMapper,
 }
 
 def map_data(list_of_datasets, list_of_mappings):
