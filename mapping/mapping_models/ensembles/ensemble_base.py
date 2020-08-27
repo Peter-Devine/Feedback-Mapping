@@ -54,5 +54,5 @@ class EnsembleBaseMapper(BaseMapper):
         raise NotImplementedError(f"Ensemble mapper needs a list of embeddings with which to create the ensemble")
 
     def get_mapping_name(self):
-        embeddings_string = "__".join(self.get_ensemble_names())
+        embeddings_string = "__".join(self.get_ensemble_components())
         return f"ensemble__{embeddings_string}"
