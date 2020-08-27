@@ -10,6 +10,9 @@ class EnsembleBaseMapper(BaseMapper):
     def get_embeds(self):
 
         embeddings_dir = os.path.join(".", "data", "embeddings", self.test_dataset, self.app_name)
+        raw_dir = os.path.join(".", "data", "raw", self.test_dataset, f"{self.app_name}.csv")
+
+        raw_df = pd.read_csv(raw_dir)
 
         concatenated_embedding = None
 
@@ -43,7 +46,7 @@ class EnsembleBaseMapper(BaseMapper):
             pca = PCA(n_components=PCA_SIZE)
             concatenated_embedding = pca.fit_transform(tf_idf_embed)
 
-        return concatenated_embedding, labels
+        return concatenated_embedding, raw_df
 
     def get_pca_size(self):
         # Returns the number of components to use in PCA decomposition.
