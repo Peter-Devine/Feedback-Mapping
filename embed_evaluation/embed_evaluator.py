@@ -9,8 +9,8 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import homogeneity_score
 from sklearn.metrics import pairwise_distances_argmin_min
 
-from utils.utils import create_dir, get_random_seed
-from embed_evaluation.make_examples_viz import create_example_viz_html
+from utils.utils import get_random_seed, create_path
+from embed_evaluation.make_nn_finder import create_nn_finder_html
 
 # Find all the embeddings, and evaluate them
 def eval_embeds():
@@ -74,22 +74,9 @@ def output_results_df(result_type, dataset_name, app_name, embedding_name, df):
     file_path = os.path.join(app_dir, embedding_name)
     output_df(df, file_path)
 
-# Saves the df to a .html file with an interactive visualisation of the points relative to an example point
-def output_results_example(dataset_name, app_name, embedding_name, df):
-    app_dir = create_results_dirs("examples", dataset_name, app_name)
-    file_path = os.path.join(app_dir, embedding_name)
-    create_example_viz_html(df, file_path)
-
 # Makes sure that the ./results/[dataset_name]/[app_name] dir exists
 def create_results_dirs(result_type, dataset_name, app_name):
-    all_results_dir = os.path.join(".", "results")
-    create_dir(all_results_dir)
-    results_dir = os.path.join(all_results_dir, result_type)
-    create_dir(results_dir)
-    dataset_dir = os.path.join(results_dir, dataset_name)
-    create_dir(dataset_dir)
-    app_dir = os.path.join(dataset_dir, app_name)
-    create_dir(app_dir)
+    app_dir = create_path([".", "results", result_type, dataset_name, app_name])
     return app_dir
 
 # Gets a dict of dfs for each embedding in each app in each dataset.
@@ -210,48 +197,24 @@ def avg_inter_label_distance_diff_p(embeddings, labels, metric="euclidean"):
 
     return distance_p_val, intra_mean, inter_mean
 
-# Gets the text of example points
+# Creates a HTML visualisation of the dataset, where the closest X feedbacks are listed next to a chosen references, order by distance
 def sort_points_by_ref(dataset_name, app_name, embedding_name, embeddings, labels):
     # First, find the euclidean distances between every embedding
     mutual_distances = get_pairwise_dist(embeddings, metric="euclidean")
-    closest_args = mutual_distances.argsort()
 
-    # We also find the cos distance to see if there are any great discrepancies between cos and euclidean
-    mutual_cos_distances = get_pairwise_dist(embeddings, metric="cosine")
+    # Get the text associated with each feedback
+    text_df = get_feedback_text(dataset_name, app_name)
 
-    for label in labels.unique():
-        # Get the randomly sampled reference points position
-        ref_idx = labels[labels == label].sample(n = 1, random_state = get_random_seed()).index[0]
-        ref_numerical_idx = labels.index.get_loc(ref_idx)
+    # Find a place to save this visualisation
+    finder_dir = create_path([".", "results", "", dataset_name, app_name], file_name=embedding_name)
 
-        # Find the numerical position and distance of the k nearest points to the reference point
-        nearest_points_numerical_idx = closest_args[ref_numerical_idx]
-        nearest_points_distances = mutual_distances[ref_numerical_idx, nearest_points_numerical_idx]
-        nearest_points_cos_distances = mutual_cos_distances[ref_numerical_idx, nearest_points_numerical_idx]
+    # Create the visualisation
+    create_nn_finder_html(mutual_distances, text_df, finder_dir)
 
-        # Get the indices of reference point + knn
-        select_idx = [x for x in nearest_points_numerical_idx]
-
-        # Get the accompanying text and labels of these points
-        nearest_df = get_examples_text(select_idx, dataset_name, app_name)
-        nearest_df["point_num"] = [f"{label}_point_{i}" for i in range(nearest_df.shape[0])]
-        nearest_df["euclidean_distance"] = [x for x in nearest_points_distances]
-        nearest_df["cosine_distance"] = [x for x in nearest_points_cos_distances]
-
-        nearest_df = nearest_df.set_index("point_num", drop=False)
-
-        output_results_example(dataset_name, app_name, f"{embedding_name}__{label}", nearest_df)
-        output_results_df("examples", dataset_name, app_name,  f"{embedding_name}__{label}", nearest_df)
-
-def get_examples_text(idx, dataset_name, app_name):
+def get_feedback_text(dataset_name, app_name):
     # Get the original text data of the dataset
     text_dir = os.path.join(".", "data", "raw", dataset_name, f"{app_name}.csv")
     text_df = pd.read_csv(text_dir, index_col = 0)
 
-    # Get the observations from the dataset that correspond to the supplied idx
-    selected_df = text_df.iloc[idx]
-    # Only output the text and label of the found points (the output looks cluttered otherwise)
-    selected_df = selected_df[["text", "label"]]
-
-    # Return the text and labels from the selected observations of this dataset
-    return selected_df
+    # Return the text and labels of this dataset
+    return text_df

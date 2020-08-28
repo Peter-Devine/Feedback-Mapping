@@ -5,11 +5,11 @@ from bokeh.layouts import column, row
 def create_nn_finder_html(distances, text_df,  file_path):
 
     source = ColumnDataSource(data=dict(
-        ids=range(len(df_text.text)),
-        distances=distances,
-        text=df_text.text,
-        display_text=df_text.text,
-        display_ids=range(len(df_text.text)),
+        ids=range(len(text_df.text)),
+        distances=distances.tolist(),
+        text=text_df.text,
+        display_text=text_df.text,
+        display_ids=range(len(text_df.text)),
     ))
 
     display_source = ColumnDataSource(data=dict(
@@ -72,10 +72,9 @@ def create_nn_finder_html(distances, text_df,  file_path):
 
                 const texts = data['text'];
 
-                const flat_dist = data['distances'];
-                const size = flat_dist.length**(1/2);
+                const list_of_dist = data['distances'];
 
-                const selected_dist = flat_dist.slice(selected_idx*size, (selected_idx+1) * size)
+                const selected_dist = list_of_dist[selected_idx];
 
                 function indexOfNMin(arr, n) {
 
