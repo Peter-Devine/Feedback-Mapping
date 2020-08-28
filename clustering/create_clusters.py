@@ -29,6 +29,6 @@ def cluster_embed(dataset_name, app_name, embedding_name, embedding_df, labels):
 
     cluster_labels_df = pd.DataFrame({"cluster_label": clustered_labels, "label":labels}, index=embedding_df.index)
 
-    path = create_path([".", "data", "clusters", dataset_name, app_name, embedding_name])
+    path = create_path([".", "data", "clusters", dataset_name, app_name], file_name = f"{embedding_name}.csv")
 
     cluster_labels_df.to_csv(path)

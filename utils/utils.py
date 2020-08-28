@@ -6,11 +6,15 @@ def create_dir(dir):
         print(f"Creating output directory at {dir}")
         os.mkdir(dir)
 
-def create_path(list_of_dirs):
+def create_path(list_of_dirs, file_name = None):
     all_dir = ""
     for dir in list_of_dirs:
         all_dir = os.path.join(all_dir, dir)
         create_dir(all_dir)
+
+    if file_name is not None:
+        all_dir = os.path.join(all_dir, file_name)
+
     return all_dir
 
 seed_env_var_name = "PYTHON_RANDOM_SEED_CLUSTERING"
