@@ -58,4 +58,4 @@ class EnsembleBaseMapper(BaseMapper):
 
     def get_mapping_name(self):
         embeddings_string = "__".join(self.get_ensemble_components())
-        return f"ensemble__{embeddings_string}"
+        return f"ensemble__{embeddings_string}_{get_pca_size()}"
