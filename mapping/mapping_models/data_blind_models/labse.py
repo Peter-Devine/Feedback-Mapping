@@ -84,6 +84,15 @@ class LabseMapper(BaseMapper):
             input_text, tokenizer, max_seq_length)
           return labse_model([input_ids, input_mask, segment_ids])
 
-        embeddings = encode(sentence_list)
+        batch_size = 128
+        embeddings = []
+        for i in range(len(sentence_list) * batch_size):
+            batch_start = i * batch_size
+            batch_end = (i+1) * batch_size
+
+            batch = sentence_list[batch_start : batch_end]
+            embeddings.append(encode(sentence_list))
+
+        embeddings = np.stack(embeddings, axis=0)
 
         return embeddings
