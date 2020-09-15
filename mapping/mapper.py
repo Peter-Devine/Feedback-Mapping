@@ -27,10 +27,12 @@ from mapping.mapping_models.data_blind_models.outside_trained.bert_nsp_trained_o
 from mapping.mapping_models.data_blind_models.gem import GemMapper
 from mapping.mapping_models.data_blind_models.glove import GloveMapper
 from mapping.mapping_models.data_blind_models.keyword_matching import KeywordMatchingMapper
+from mapping.mapping_models.data_blind_models.labse import LabseMapper
 from mapping.mapping_models.data_blind_models.random import RandomMapper
 from mapping.mapping_models.data_blind_models.sbert_wk import SBertWKMapper
 from mapping.mapping_models.data_blind_models.sbert import SBertMapper
 from mapping.mapping_models.data_blind_models.t5_vanilla import T5VanillaMapper
+from mapping.mapping_models.data_blind_models.use_multilingual import UseMultilingualMapper
 from mapping.mapping_models.data_blind_models.use import UseMapper
 
 ##########################################################
@@ -96,10 +98,12 @@ MAPPER_DICT = {
     "gem": GemMapper,
     "glove": GloveMapper,
     "keyword_matching": KeywordMatchingMapper,
+    "labse": LabseMapper,
     "random": RandomMapper,
     "sbert_wk": SBertWKMapper,
     "sbert": SBertMapper,
     "t5_vanilla": T5VanillaMapper,
+    "use_multilingual": UseMultilingualMapper,
     "use": UseMapper,
 
     "gsdmm": GsdmmMapper,
