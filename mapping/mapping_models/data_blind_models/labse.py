@@ -91,7 +91,7 @@ class LabseMapper(BaseMapper):
             batch_end = (i+1) * batch_size
 
             batch = sentence_list[batch_start : batch_end]
-            embeddings.append(encode(sentence_list))
+            embeddings.append(encode(batch))
 
         embeddings = np.stack(embeddings, axis=0)
 
