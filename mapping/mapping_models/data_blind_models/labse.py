@@ -5,15 +5,6 @@ import tensorflow as tf
 import tensorflow_hub as hub
 import bert
 
-import os
-import requests
-import zipfile
-import tarfile
-
-import pandas as pd
-
-import tensorflow as tf
-import tensorflow_hub as hub
 from mapping.mapping_models.mapping_models_base import BaseMapper
 
 class LabseMapper(BaseMapper):
@@ -23,7 +14,7 @@ class LabseMapper(BaseMapper):
         df = self.get_dataset(dataset_name=self.test_dataset, app_name=self.app_name)
 
         # Get embeddings from text using model
-        embeddings = get_labse_embeddings(list(df["text"]))
+        embeddings = self.get_labse_embeddings(list(df["text"]))
 
         # return embeddings and labels associated with those embeddings
         return embeddings.numpy(), df
@@ -95,4 +86,4 @@ class LabseMapper(BaseMapper):
 
         embeddings = encode(sentence_list)
 
-        return embeddings.numpy()
+        return embeddings
