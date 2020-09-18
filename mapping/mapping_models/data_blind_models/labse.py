@@ -1,9 +1,6 @@
-# !pip install bert-for-tf2
-
 import numpy as np
-import tensorflow as tf
-import tensorflow_hub as hub
-import bert
+from transformers import AutoTokenizer, AutoModel
+import torch
 
 from mapping.mapping_models.mapping_models_base import BaseMapper
 
@@ -25,74 +22,33 @@ class LabseMapper(BaseMapper):
 
     def get_labse_embeddings(self, sentence_list):
 
-        def get_model(model_url, max_seq_length):
-          labse_layer = hub.KerasLayer(model_url, trainable=True)
+        # from sentence-transformers
+        def mean_pooling(model_output, attention_mask):
+            token_embeddings = model_output[0] #First element of model_output contains all token embeddings
+            input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+            sum_embeddings = torch.sum(token_embeddings * input_mask_expanded, 1)
+            sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+            return sum_embeddings / sum_mask
 
-          # Define input.
-          input_word_ids = tf.keras.layers.Input(shape=(max_seq_length,), dtype=tf.int32,
-                                                 name="input_word_ids")
-          input_mask = tf.keras.layers.Input(shape=(max_seq_length,), dtype=tf.int32,
-                                             name="input_mask")
-          segment_ids = tf.keras.layers.Input(shape=(max_seq_length,), dtype=tf.int32,
-                                              name="segment_ids")
+        tokenizer = AutoTokenizer.from_pretrained("pvl/labse_bert", do_lower_case=False)
+        model = AutoModel.from_pretrained("pvl/labse_bert")
 
-          # LaBSE layer.
-          pooled_output,  _ = labse_layer([input_word_ids, input_mask, segment_ids])
+        encoded_input = tokenizer(sentence_list, padding=True, truncation=True, max_length=256, return_tensors='pt')
 
-          # The embedding is l2 normalized.
-          pooled_output = tf.keras.layers.Lambda(
-              lambda x: tf.nn.l2_normalize(x, axis=1))(pooled_output)
+        # Batch tensor so we can iterate over inputs
+        test_loader = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(encoded_input['input_ids'],
+                                                  encoded_input['token_type_ids'],
+                                                  encoded_input['attention_mask']), batch_size=64, shuffle=False)
 
-          # Define model.
-          return tf.keras.Model(
-                inputs=[input_word_ids, input_mask, segment_ids],
-                outputs=pooled_output), labse_layer
+        embed_list = []
 
-        max_seq_length = 256
-        labse_model, labse_layer = get_model(
-            model_url="https://tfhub.dev/google/LaBSE/1", max_seq_length=max_seq_length)
+        for input_ids, token_type_ids, attention_mask in test_loader:
 
-        vocab_file = labse_layer.resolved_object.vocab_file.asset_path.numpy()
-        do_lower_case = labse_layer.resolved_object.do_lower_case.numpy()
-        tokenizer = bert.bert_tokenization.FullTokenizer(vocab_file, do_lower_case)
+            with torch.no_grad():
+                model_output = model(input_ids=input_ids, token_type_ids=token_type_ids, attention_mask=attention_mask)
 
-        def create_input(input_strings, tokenizer, max_seq_length):
+            sentence_embeddings = mean_pooling(model_output, attention_mask)
 
-          input_ids_all, input_mask_all, segment_ids_all = [], [], []
-          for input_string in input_strings:
-            # Tokenize input.
-            input_tokens = ["[CLS]"] + tokenizer.tokenize(input_string) + ["[SEP]"]
-            input_ids = tokenizer.convert_tokens_to_ids(input_tokens)
-            sequence_length = min(len(input_ids), max_seq_length)
+            embed_list.append(sentence_embeddings)
 
-            # Padding or truncation.
-            if len(input_ids) >= max_seq_length:
-              input_ids = input_ids[:max_seq_length]
-            else:
-              input_ids = input_ids + [0] * (max_seq_length - len(input_ids))
-
-            input_mask = [1] * sequence_length + [0] * (max_seq_length - sequence_length)
-
-            input_ids_all.append(input_ids)
-            input_mask_all.append(input_mask)
-            segment_ids_all.append([0] * max_seq_length)
-
-          return np.array(input_ids_all), np.array(input_mask_all), np.array(segment_ids_all)
-
-        def encode(input_text):
-          input_ids, input_mask, segment_ids = create_input(
-            input_text, tokenizer, max_seq_length)
-          return labse_model([input_ids, input_mask, segment_ids])
-
-        batch_size = 128
-        embeddings = []
-        for i in range(len(sentence_list) * batch_size):
-            batch_start = i * batch_size
-            batch_end = (i+1) * batch_size
-
-            batch = sentence_list[batch_start : batch_end]
-            embeddings.append(encode(batch))
-
-        embeddings = np.stack(embeddings, axis=0)
-
-        return embeddings
+        return torch.cat(embed_list, dim=0)
